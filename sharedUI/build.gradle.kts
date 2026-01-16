@@ -48,6 +48,7 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(libs.materialKolor)
             implementation(libs.androidx.material3.adaptive)
+            implementation(libs.metro.viewmodel)
         }
 
         commonTest.dependencies {

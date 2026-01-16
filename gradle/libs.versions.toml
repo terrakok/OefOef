@@ -54,6 +54,7 @@ multiplatformSettings = { module = "com.russhwolf:multiplatform-settings-no-arg"
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
 androidx-material3-adaptive = { module = "org.jetbrains.compose.material3.adaptive:adaptive", version.ref = "androidx-adaptive" }
+metro-viewmodel = { module = "dev.zacsweers.metro:metrox-viewmodel-compose", version.ref = "metro" }
 
 [plugins]
 

@@ -16,48 +16,45 @@ import com.github.terrakok.nedleraar.ui.SplitSceneStrategy
 import com.github.terrakok.nedleraar.ui.lesson.LessonPage
 import com.github.terrakok.nedleraar.ui.question.OpenQuestionPage
 import com.github.terrakok.nedleraar.ui.rememberSplitSceneStrategy
+import com.github.terrakok.nedleraar.ui.welcome.WelcomePage
 
 @Preview
 @Composable
 fun App(
     onThemeChanged: @Composable (isDark: Boolean) -> Unit = {}
-) = AppTheme(onThemeChanged) {
-    val backStack = remember { mutableStateListOf<NavKey>(LessonScreen(""), OpenQuestionScreen("")) }
+) = WithAppGraph {
+    AppTheme(onThemeChanged) {
+        val backStack = remember { mutableStateListOf<NavKey>(WelcomeScreen) }
 
-    NavDisplay(
-        backStack = backStack,
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceContainerLowest),
-        sceneStrategy = rememberSplitSceneStrategy(),
-        entryProvider = entryProvider {
-            entry<LessonScreen>(
-                metadata = SplitSceneStrategy.split()
-            ) {
-                LessonPage(
-                    videoData = VideoData(
-                        "2afXl60VFlg",
-                        "Ik zou graag een kopje koffie willen bestellen.",
-                        "https://i.ytimg.com/vi/2afXl60VFlg/sddefault.jpg",
-                        255,
-                        listOf(
-                            VideoText(0, "Natuurlijk, wil je daar melk en suiker bij? Nee, zwart alsjeblieft."),
-                            VideoText(
-                                75000,
-                                "Hoi Anna, hoe gaat het met je vandaag? Ik zou graag een kopje koffie willen bestellen."
-                            ),
-                            VideoText(84000, "Ik zou graag een kopje koffie willen bestellen."),
-                            VideoText(90000, "Natuurlijk, wil je daar melk en suiker bij?"),
-                            VideoText(95000, "Nee, zwart alsjeblieft. En een stukje appeltaart."),
-                        )
-                    ),
-                    onBackClick = { if (backStack.size > 1) backStack.removeLast() }
-                )
+        NavDisplay(
+            backStack = backStack,
+            modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceContainerLowest),
+            sceneStrategy = rememberSplitSceneStrategy(),
+            entryProvider = entryProvider {
+                entry<WelcomeScreen> {
+                    WelcomePage(
+                        onLessonHeaderClick = { lesson ->
+                            backStack.add(LessonScreen(lesson.id))
+                            backStack.add(OpenQuestionScreen)
+                        }
+                    )
+                }
+                entry<LessonScreen>(
+                    metadata = SplitSceneStrategy.split()
+                ) {
+                    LessonPage(
+                        id = it.videoId,
+                        onBackClick = { if (backStack.size > 1) backStack.removeLast() }
+                    )
+                }
+                entry<OpenQuestionScreen> {
+                    OpenQuestionPage("Wat is het verschil tussen de vrije sector en de sociale sector voor huren?", 12, 5)
+                }
             }
-            entry<OpenQuestionScreen> {
-                OpenQuestionPage("Translate the phrase spoken by the customer.", 2, 5)
-            }
-        }
-    )
+        )
+    }
 }
 
+private data object WelcomeScreen : NavKey
 private data class LessonScreen(val videoId: String) : NavKey
-private data class OpenQuestionScreen(val questionId: String) : NavKey
+private data object OpenQuestionScreen : NavKey

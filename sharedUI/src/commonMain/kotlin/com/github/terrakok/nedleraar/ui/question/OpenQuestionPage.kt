@@ -68,7 +68,7 @@ fun OpenQuestionPage(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             var answer by remember { mutableStateOf("Ik wil graag een kopje koffie bestellen.") }
             TextField(
                 value = answer,
@@ -90,7 +90,7 @@ fun OpenQuestionPage(
             Spacer(modifier = Modifier.height(48.dp))
 
             FeedbackCard()
-            
+
             Spacer(modifier = Modifier.height(32.dp))
         }
     }

@@ -2,29 +2,30 @@ package com.github.terrakok.nedleraar
 
 import androidx.compose.runtime.Immutable
 
-@Immutable
-data class VideoData(
+data class LessonHeader(
     val id: String,
     val title: String,
     val previewUrl: String,
-    val lengthSeconds: Int,
-    val text: List<VideoText>
-)
-
-data class VideoText(
-    val timestamp: Long,
-    val text: String
+    val lengthSeconds: Int
 )
 
 @Immutable
 data class Lesson(
     val id: String,
+    val videoId: String,
     val title: String,
-    val videoData: VideoData,
-    val questions: List<OpenQuestions>
+    val previewUrl: String,
+    val lengthSeconds: Int,
+    val videoTranscription: List<TranscriptionItem>,
+    val questions: List<OpenQuestion>
 )
 
-data class OpenQuestions(
+data class TranscriptionItem(
+    val timestamp: Int,
+    val text: String
+)
+
+data class OpenQuestion(
     val id: String,
     val text: String
 )

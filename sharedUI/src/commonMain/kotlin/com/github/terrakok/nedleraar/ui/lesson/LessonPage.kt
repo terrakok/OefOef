@@ -1,18 +1,14 @@
 package com.github.terrakok.nedleraar.ui.lesson
- 
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,37 +18,59 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.github.terrakok.nedleraar.Lesson
+import com.github.terrakok.nedleraar.TranscriptionItem
 import com.github.terrakok.nedleraar.ui.AppTheme
 import com.github.terrakok.nedleraar.ui.Icons
-import com.github.terrakok.nedleraar.VideoData
-import com.github.terrakok.nedleraar.VideoText
+import com.github.terrakok.nedleraar.ui.LoadingWidget
+import dev.zacsweers.metrox.viewmodel.assistedMetroViewModel
 
 @Preview
 @Composable
 private fun LessonPagePreview() {
     AppTheme {
-        LessonPage(
-            VideoData(
-                "ididid",
-                "Ik zou graag een kopje koffie willen bestellen.",
-                "https://i.ytimg.com/vi/2afXl60VFlg/sddefault.jpg",
-                255,
-                listOf(
-                    VideoText(0, "Natuurlijk, wil je daar melk en suiker bij? Nee, zwart alsjeblieft."),
-                    VideoText(75000, "Hoi Anna, hoe gaat het met je vandaag? Ik zou graag een kopje koffie willen bestellen."),
-                    VideoText(84000, "Ik zou graag een kopje koffie willen bestellen."),
-                    VideoText(90000, "Natuurlijk, wil je daar melk en suiker bij?"),
-                    VideoText(95000, "Nee, zwart alsjeblieft. En een stukje appeltaart."),
-                )
+        LessonPageContent(
+            Lesson(
+                id = "1",
+                title = "2026-01-11 08:17",
+                previewUrl = "https://i.ytimg.com/vi/SgXPCcK22h4/hqdefault.jpg",
+                videoId = "",
+                videoTranscription = listOf(
+                    TranscriptionItem(1, "Hello world!"),
+                    TranscriptionItem(2, "How are you?"),
+                ),
+                lengthSeconds = 0,
+                questions = emptyList()
             )
         )
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LessonPage(
-    videoData: VideoData,
+    id: String,
+    onBackClick: () -> Unit = {}
+) {
+    val vm = assistedMetroViewModel<LessonViewModel, LessonViewModel.Factory>(key = id) {
+        create(id)
+    }
+    if (vm.loading || vm.error != null) {
+        LoadingWidget(
+            modifier = Modifier.fillMaxSize(),
+            error = vm.error,
+            loading = vm.loading,
+            onReload = { vm.loadData() }
+        )
+        return
+    }
+
+    LessonPageContent(vm.lesson!!, onBackClick)
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LessonPageContent(
+    lesson: Lesson,
     onBackClick: () -> Unit = {}
 ) {
     Scaffold(
@@ -109,10 +127,8 @@ fun LessonPage(
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp)
         ) {
-            var videoProgress by remember { mutableStateOf(0L) }
-
             Spacer(modifier = Modifier.height(16.dp))
-            VideoPlayerPlaceholder(videoData)
+            VideoPlayerPlaceholder(lesson.previewUrl)
             Spacer(modifier = Modifier.height(32.dp))
             Text(
                 text = "TRANSCRIPT",
@@ -124,10 +140,8 @@ fun LessonPage(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                itemsIndexed(videoData.text) { index, textSegment ->
-                    val range = textSegment.timestamp..if (index < videoData.text.lastIndex) videoData.text[index + 1].timestamp else Long.MAX_VALUE
-                    val isActive = videoProgress in range
-                    TextSegmentItem(textSegment, isActive)
+                items(lesson.videoTranscription) { textSegment ->
+                    TextSegmentItem(textSegment, false)
                 }
             }
         }
@@ -135,7 +149,7 @@ fun LessonPage(
 }
 
 @Composable
-private fun VideoPlayerPlaceholder(videoData: VideoData) {
+private fun VideoPlayerPlaceholder(previewUrl: String) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -145,7 +159,7 @@ private fun VideoPlayerPlaceholder(videoData: VideoData) {
         contentAlignment = Alignment.Center
     ) {
         AsyncImage(
-            model = videoData.previewUrl,
+            model = previewUrl,
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
@@ -177,10 +191,11 @@ private fun VideoPlayerPlaceholder(videoData: VideoData) {
 
 @Composable
 private fun TextSegmentItem(
-    textSegment: VideoText,
+    transcriptionItem: TranscriptionItem,
     isActive: Boolean
 ) {
-    val timestampColor = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
+    val timestampColor =
+        if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
     val fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal
     Box(
         modifier = Modifier
@@ -198,7 +213,7 @@ private fun TextSegmentItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = formatTimestamp(textSegment.timestamp),
+                text = "#" + transcriptionItem.timestamp.toString().padStart(2, '0'),
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Bold,
                     color = timestampColor
@@ -207,7 +222,7 @@ private fun TextSegmentItem(
             )
             Spacer(modifier = Modifier.width(12.dp))
             Text(
-                text = textSegment.text,
+                text = transcriptionItem.text,
                 style = MaterialTheme.typography.bodySmall.copy(
                     fontWeight = fontWeight,
                     color = MaterialTheme.colorScheme.onSurface
@@ -216,11 +231,4 @@ private fun TextSegmentItem(
             )
         }
     }
-}
-
-private fun formatTimestamp(timestampMs: Long): String {
-    val totalSeconds = timestampMs / 1000
-    val minutes = totalSeconds / 60
-    val seconds = totalSeconds % 60
-    return "${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
 }
