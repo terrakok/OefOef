@@ -100,7 +100,7 @@ private fun LessonPageContent(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Back to Course",
+                            text = "Back to Main",
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -109,15 +109,8 @@ private fun LessonPageContent(
                 actions = {
                     IconButton(onClick = {}) {
                         Icon(
-                            imageVector = Icons.Bookmark,
-                            contentDescription = "Bookmark",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    IconButton(onClick = {}) {
-                        Icon(
-                            imageVector = Icons.More,
-                            contentDescription = "More",
+                            imageVector = Icons.Translate,
+                            contentDescription = "Translate",
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -140,12 +133,12 @@ private fun LessonPageContent(
             )
             Spacer(modifier = Modifier.height(16.dp))
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier.fillMaxSize()
             ) {
                 items(lesson.videoTranscription) { textSegment ->
                     TextSegmentItem(textSegment, false)
                 }
+                item { Spacer(modifier = Modifier.height(24.dp)) }
             }
         }
     }
@@ -168,13 +161,6 @@ private fun VideoPlayerPlaceholder(previewUrl: String) {
             contentScale = ContentScale.Crop,
         )
 
-        // Semi-transparent overlay to make controls visible
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.2f))
-        )
-
         Surface(
             modifier = Modifier.size(64.dp),
             shape = CircleShape,
@@ -189,6 +175,11 @@ private fun VideoPlayerPlaceholder(previewUrl: String) {
                 )
             }
         }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable {}
+        )
     }
 }
 
