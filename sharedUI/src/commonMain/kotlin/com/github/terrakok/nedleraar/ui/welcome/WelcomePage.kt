@@ -88,11 +88,11 @@ fun WelcomePageContent(
 
         LazyVerticalGrid(
             state = state,
-            columns = GridCells.Adaptive(minSize = 280.dp),
+            columns = GridCells.Adaptive(minSize = 300.dp),
             modifier = Modifier.fillMaxSize(),
             contentPadding = paddingValues.plus(PaddingValues(horizontal = 16.dp, vertical = 48.dp)),
-            horizontalArrangement = Arrangement.spacedBy(24.dp),
-            verticalArrangement = Arrangement.spacedBy(32.dp)
+            horizontalArrangement = Arrangement.spacedBy(20.dp),
+            verticalArrangement = Arrangement.spacedBy(28.dp)
         ) {
             item(
                 span = { GridItemSpan(maxCurrentLineSpan) }
@@ -178,6 +178,7 @@ private fun LessonCard(
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .clickable { onClick() }
+            .padding(8.dp),
     ) {
         Box(
             modifier = Modifier
@@ -214,7 +215,7 @@ private fun LessonCard(
             text = lesson.title,
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier.padding(top = 8.dp)
         )
     }
 }
