@@ -8,6 +8,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavEntry
@@ -16,6 +18,8 @@ import androidx.navigation3.scene.SceneStrategy
 import androidx.navigation3.scene.SceneStrategyScope
 import androidx.window.core.layout.WindowSizeClass
 import com.github.terrakok.nedleraar.isWide
+
+internal val LocalIsSplitMode = compositionLocalOf { false }
 
 @Composable
 internal fun <T : Any> rememberSplitSceneStrategy(): SplitSceneStrategy<T> {
@@ -55,18 +59,22 @@ class SplitScene<T : Any>(
 ) : Scene<T> {
     override val entries = listOfNotNull(left, right)
     override val content: @Composable (() -> Unit) = {
-        Row(
-            modifier = Modifier.fillMaxSize()
+        CompositionLocalProvider(
+            LocalIsSplitMode provides true
         ) {
-            Box(
-                modifier = Modifier.fillMaxHeight().weight(2f / 5f),
-                content = { left.Content() }
-            )
-            VerticalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-            Box(
-                modifier = Modifier.fillMaxHeight().weight(3f / 5f),
-                content = { right?.Content() }
-            )
+            Row(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxHeight().weight(2f / 5f),
+                    content = { left.Content() }
+                )
+                VerticalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                Box(
+                    modifier = Modifier.fillMaxHeight().weight(3f / 5f),
+                    content = { right?.Content() }
+                )
+            }
         }
     }
 

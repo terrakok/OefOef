@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.terrakok.nedleraar.ui.Icons
 import com.github.terrakok.nedleraar.ui.LoadingWidget
+import com.github.terrakok.nedleraar.ui.LocalIsSplitMode
 import dev.zacsweers.metrox.viewmodel.assistedMetroViewModel
 
 @Composable
@@ -48,7 +49,7 @@ fun OpenQuestionPage(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
         topBar = {
-            TopBar(vm.currentQuestionIndex + 1, lesson.questions.size)
+            TopBar(onBackClick = onBackClick)
         },
         bottomBar = {
             BottomBar(
@@ -117,42 +118,72 @@ fun OpenQuestionPage(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TopBar(index: Int, total: Int) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 24.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(8.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "LISTENING PRACTICE",
-                style = MaterialTheme.typography.labelLarge.copy(
-                    letterSpacing = 1.sp
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-            )
-        }
-        Text(
-            text = buildAnnotatedString {
-                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                    append(index.toString())
+private fun TopBar(
+    onBackClick: () -> Unit
+) {
+    TopAppBar(
+        title = {},
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+        ),
+        navigationIcon = {
+            if (LocalIsSplitMode.current) {
+                Row(
+                    modifier = Modifier
+                        .padding(start = 4.dp)
+                        .padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "LISTENING PRACTICE",
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            letterSpacing = 1.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    )
                 }
-                append(" / $total")
-            },
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
+            } else {
+                Row(
+                    modifier = Modifier
+                        .padding(start = 4.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable { onBackClick() }
+                        .padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Back,
+                        contentDescription = "Back",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Back to Video",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        },
+        actions = {
+            IconButton(onClick = {}) {
+                Icon(
+                    imageVector = Icons.Flag,
+                    contentDescription = "Report issue",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    )
 }
 
 @Composable
@@ -260,62 +291,42 @@ private fun BottomBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 20.dp),
+                .padding(horizontal = 24.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .clickable { /* Report issue */ }
-                    .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Flag,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Report issue",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                )
-            }
+
             Spacer(modifier = Modifier.weight(1f))
 
-            if (currentQuestionIndex > 0) {
-                IconButton(
-                    onClick = onPreviousClick,
-                ) {
-                    Icon(
-                        imageVector = Icons.ArrowRight,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp).rotate(180f),
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(16.dp))
+            Button(
+                enabled = currentQuestionIndex > 0,
+                onClick = onPreviousClick,
+                shape = RoundedCornerShape(50),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                ),
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                modifier = Modifier.padding(horizontal = 16.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.ArrowRight,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp).rotate(180f),
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
             }
+
+            Text("${currentQuestionIndex + 1} / $totalQuestions")
 
             Button(
                 enabled = currentQuestionIndex < totalQuestions - 1,
                 onClick = onNextClick,
-                modifier = Modifier.height(56.dp),
-                shape = RoundedCornerShape(28.dp),
+                shape = RoundedCornerShape(50),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
                 ),
-                contentPadding = PaddingValues(horizontal = 32.dp)
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                modifier = Modifier.padding(horizontal = 16.dp)
             ) {
-                Text(
-                    text = "Next Question",
-                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-                Spacer(modifier = Modifier.width(8.dp))
                 Icon(
                     imageVector = Icons.ArrowRight,
                     contentDescription = null,
@@ -323,6 +334,23 @@ private fun BottomBar(
                     tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+//            if (currentQuestionIndex > 0) {
+//                IconButton(
+//                    onClick = onPreviousClick,
+//                ) {
+//                    Icon(
+//                        imageVector = Icons.ArrowRight,
+//                        contentDescription = null,
+//                        modifier = Modifier.size(20.dp).rotate(180f),
+//                        tint = MaterialTheme.colorScheme.onSurface
+//                    )
+//                }
+//
+//                Spacer(modifier = Modifier.width(16.dp))
+//            }
         }
     }
 }
