@@ -159,7 +159,7 @@ private fun LessonPageContent(
                 ExtendedFloatingActionButton(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .padding(bottom = 40.dp, end = 16.dp),
+                        .padding(bottom = 24.dp),
                     onClick = onLearnClick,
                 ) {
                     Icon(
