@@ -15,11 +15,12 @@ actual fun YouTubeWidget(
     videoId: String,
     modifier: Modifier
 ) {
+    val videoUrl = "https://www.youtube.com/embed/${videoId}?autoplay=1"
     Box(modifier) {
         WebElementView(
             factory = {
                 (document.createElement("iframe") as HTMLIFrameElement).apply {
-                    src = "https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&disablekb=1"
+                    src = videoUrl
                 }
             },
             modifier = Modifier.fillMaxSize()
