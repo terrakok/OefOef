@@ -92,7 +92,9 @@ fun OpenQuestionPage(
             Spacer(modifier = Modifier.height(8.dp))
 
             var answer by vm.answer
+            val isFeedbackLoading = vm.feedback is Feedback.Loading
             TextField(
+                enabled = !isFeedbackLoading,
                 value = answer,
                 onValueChange = { answer = it.replace('\n', ' ') },
                 modifier = Modifier.fillMaxWidth(),
