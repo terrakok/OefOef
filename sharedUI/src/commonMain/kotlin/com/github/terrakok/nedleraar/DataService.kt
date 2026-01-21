@@ -5,6 +5,7 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import kotlinx.coroutines.Dispatchers
@@ -58,7 +59,7 @@ class DataService(
             val questions = practice.getValue("open_questions").jsonArray.mapIndexed { index, element ->
                 val q = element.jsonObject
                 OpenQuestion(
-                    id = index.toString(),
+                    id = q.getValue("id").jsonPrimitive.content,
                     text = q.getValue("question").jsonPrimitive.content,
                     textEn = q.getValue("question_en").jsonPrimitive.content
                 )
@@ -94,15 +95,16 @@ class DataService(
 
     suspend fun checkAnswer(
         lessonId: String,
-        questionIndex: Int,
+        questionId: String,
         answer: String
     ): String {
         val lang = getLesson(lessonId).lang
         val jo = httpClient.get(API_URL + "check_answer", {
             parameter("lessonId", lessonId)
             parameter("lang", lang)
-            parameter("questionIndex", questionIndex)
+            parameter("questionId", questionId)
             parameter("answer", answer)
+            timeout { requestTimeoutMillis = 60_000  }
         }).body<JsonObject>()
 
         if (jo.containsKey("error") && jo["error"] != null) {

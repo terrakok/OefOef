@@ -92,12 +92,11 @@ class OpenQuestionViewModel(
     }
 
     private fun checkAnswer(qId: String, answer: String) {
-        val questionIndex = currentQuestionIndex
         val lessonId = lesson?.id ?: return
         viewModelScope.launch {
             if (results[qId] is Feedback.Loading) return@launch
             results[qId] = Feedback.Loading(answer)
-            val result = dataService.checkAnswer(lessonId, questionIndex, answer)
+            val result = dataService.checkAnswer(lessonId, qId, answer)
 
             if (!result.contains("Score:")) {
                 results[qId] = Feedback.Incorrect(answer, "Try again", result)
