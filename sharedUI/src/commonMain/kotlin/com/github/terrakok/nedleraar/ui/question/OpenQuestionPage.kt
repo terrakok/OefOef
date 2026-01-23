@@ -29,11 +29,11 @@ import dev.zacsweers.metrox.viewmodel.assistedMetroViewModel
 
 @Composable
 fun OpenQuestionPage(
-    id: String,
+    lessonId: String,
     onBackClick: () -> Unit = {}
 ) {
-    val vm = assistedMetroViewModel<OpenQuestionViewModel, OpenQuestionViewModel.Factory>(key = id) {
-        create(id)
+    val vm = assistedMetroViewModel<OpenQuestionViewModel, OpenQuestionViewModel.Factory>(key = lessonId) {
+        create(lessonId)
     }
     if (vm.loading || vm.error != null) {
         LoadingWidget(

@@ -2,7 +2,6 @@ package com.github.terrakok.nedleraar.ui.question
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -11,10 +10,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.nedleraar.DataService
 import com.github.terrakok.nedleraar.Lesson
+import com.russhwolf.settings.Settings
 import dev.zacsweers.metro.*
 import dev.zacsweers.metrox.viewmodel.ManualViewModelAssistedFactory
 import dev.zacsweers.metrox.viewmodel.ManualViewModelAssistedFactoryKey
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Immutable
@@ -41,14 +40,15 @@ sealed interface Feedback {
 
 @AssistedInject
 class OpenQuestionViewModel(
-    @Assisted val id: String,
-    val dataService: DataService
+    @Assisted val lessonId: String,
+    val dataService: DataService,
+    settings: Settings
 ) : ViewModel() {
     @AssistedFactory
     @ManualViewModelAssistedFactoryKey(Factory::class)
     @ContributesIntoMap(AppScope::class)
     interface Factory : ManualViewModelAssistedFactory {
-        fun create(id: String): OpenQuestionViewModel
+        fun create(lessonId: String): OpenQuestionViewModel
     }
 
     var lesson by mutableStateOf<Lesson?>(null)
@@ -64,9 +64,10 @@ class OpenQuestionViewModel(
 
     private val answers = mutableStateMapOf<String, MutableState<String>>()
     private val results = mutableStateMapOf<String, Feedback>()
+    private val stateStore = OpenQuestionStateStore(lessonId, settings, viewModelScope)
 
     val question get() = lesson?.let { it.questions[currentQuestionIndex] } ?: error("Lesson is null")
-    val answer get() = answers.getOrPut(question.id) { mutableStateOf("") }
+    val answer get() = answers.getOrPut(question.id) { stateStore.createAnswerState(question.id) }
     val feedback get() = results[question.id]
 
     init {
@@ -78,7 +79,9 @@ class OpenQuestionViewModel(
             try {
                 loading = true
                 error = null
-                lesson = dataService.getLesson(id)
+                val loadedLesson = dataService.getLesson(lessonId)
+                restoreLessonState(loadedLesson)
+                lesson = loadedLesson
             } catch (e: Throwable) {
                 error = e.message
             } finally {
@@ -92,37 +95,59 @@ class OpenQuestionViewModel(
     }
 
     private fun checkAnswer(qId: String, answer: String) {
-        val lessonId = lesson?.id ?: return
+        val loadedLessonId = lesson?.id ?: return
         viewModelScope.launch {
             if (results[qId] is Feedback.Loading) return@launch
-            results[qId] = Feedback.Loading(answer)
-            val result = dataService.checkAnswer(lessonId, qId, answer)
+            setFeedback(qId, Feedback.Loading(answer))
+            val result = dataService.checkAnswer(loadedLessonId, qId, answer)
 
-            if (!result.contains("Score:")) {
-                results[qId] = Feedback.Incorrect(answer, "Try again", result)
+            val feedback = if (!result.contains("Score:")) {
+                Feedback.Incorrect(answer, "Try again", result)
             } else {
                 val regex = Regex("""Score:\s*([0-9]+(?:\.[0-9]+)?)\s*/\s*([0-9]+(?:\.[0-9]+)?)""")
                 val match = regex.find(result)
                 val score = match?.destructured?.component1()?.toFloatOrNull() ?: 0f
 
                 if (score >= 3f) {
-                    results[qId] = Feedback.Correct(answer, "Good", result)
+                    Feedback.Correct(answer, "Good", result)
                 } else {
-                    results[qId] = Feedback.Incorrect(answer, "Too many mistakes", result)
+                    Feedback.Incorrect(answer, "Too many mistakes", result)
                 }
             }
+            setFeedback(qId, feedback)
         }
     }
 
     fun nextQuestion() {
-        currentQuestionIndex++
-        val max = lesson?.questions?.size ?: 0
-        currentQuestionIndex.coerceIn(0..<max)
+        setQuestionIndex(currentQuestionIndex + 1)
     }
 
     fun previousQuestion() {
-        currentQuestionIndex--
+        setQuestionIndex(currentQuestionIndex - 1)
+    }
+
+    private fun restoreLessonState(lesson: Lesson) {
+        stateStore.clear()
+        answers.clear()
+        results.clear()
+        lesson.questions.forEach { question ->
+            stateStore.restoreFeedback(question.id)?.let { results[question.id] = it }
+        }
+        currentQuestionIndex = stateStore.restoreLastQuestionIndex(lesson.questions.size)
+    }
+
+    private fun setFeedback(questionId: String, feedback: Feedback) {
+        results[questionId] = feedback
+        if (feedback !is Feedback.Loading) {
+            stateStore.saveFeedback(questionId, feedback)
+        }
+    }
+
+    private fun setQuestionIndex(index: Int) {
         val max = lesson?.questions?.size ?: 0
-        currentQuestionIndex.coerceIn(0..<max)
+        val clamped = if (max == 0) 0 else index.coerceIn(0, max - 1)
+        if (clamped == currentQuestionIndex) return
+        currentQuestionIndex = clamped
+        stateStore.saveLastQuestionIndex(clamped)
     }
 }

@@ -13,8 +13,8 @@ internal actual fun BrowserNavigation(backStack: SnapshotStateList<AppNavKey>) {
         currentDestinationName = {
             when (val key =  it as AppNavKey) {
                 is WelcomeScreen -> ""
-                is LessonScreen -> "#/lesson/${key.id}"
-                is OpenQuestionScreen -> "#/lesson/${key.id}"
+                is LessonScreen -> "#/lesson/${key.lessonId}"
+                is OpenQuestionScreen -> "#/lesson/${key.lessonId}"
             }
         }
     )

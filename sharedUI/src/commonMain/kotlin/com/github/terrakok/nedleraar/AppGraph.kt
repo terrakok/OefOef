@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
+import com.russhwolf.settings.Settings
 import dev.zacsweers.metro.*
 import dev.zacsweers.metrox.viewmodel.*
 import io.ktor.client.*
@@ -45,6 +46,10 @@ internal interface AppGraph: ViewModelGraph {
             socketTimeoutMillis = 10000
         }
     }
+
+    @SingleIn(AppScope::class)
+    @Provides
+    fun provideSettings(): Settings = Settings()
 }
 
 @Composable

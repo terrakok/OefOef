@@ -40,7 +40,7 @@ fun App(
         val last = backStack.lastOrNull()
         LaunchedEffect(isWide, last) {
             if (isWide && last is LessonScreen) {
-                backStack.add(OpenQuestionScreen(last.id))
+                backStack.add(OpenQuestionScreen(last.lessonId))
             }
         }
 
@@ -66,7 +66,7 @@ fun App(
                     metadata = SplitSceneStrategy.split()
                 ) {
                     LessonPage(
-                        id = it.id,
+                        lessonId = it.lessonId,
                         onLearnClick = { id ->
                             backStack.add(OpenQuestionScreen(id))
                         },
@@ -78,7 +78,7 @@ fun App(
                 }
                 entry<OpenQuestionScreen> {
                     OpenQuestionPage(
-                        id = it.id,
+                        lessonId = it.lessonId,
                         onBackClick = { backStack.removeLast() }
                     )
                 }
@@ -89,8 +89,8 @@ fun App(
 
 internal sealed interface AppNavKey : NavKey
 internal data object WelcomeScreen : AppNavKey
-internal data class LessonScreen(val id: String) : AppNavKey
-internal data class OpenQuestionScreen(val id: String) : AppNavKey
+internal data class LessonScreen(val lessonId: String) : AppNavKey
+internal data class OpenQuestionScreen(val lessonId: String) : AppNavKey
 
 @Composable
 internal expect fun BrowserNavigation(backStack: SnapshotStateList<AppNavKey>)

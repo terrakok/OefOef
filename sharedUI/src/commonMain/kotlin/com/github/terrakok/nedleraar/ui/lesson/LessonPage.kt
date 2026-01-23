@@ -30,7 +30,6 @@ import com.github.terrakok.nedleraar.ui.LoadingWidget
 import com.github.terrakok.nedleraar.ui.LocalIsSplitMode
 import dev.zacsweers.metrox.viewmodel.assistedMetroViewModel
 import kotlin.time.Clock
-import kotlin.time.Instant
 
 @Preview
 @Composable
@@ -57,12 +56,12 @@ private fun LessonPagePreview() {
 
 @Composable
 fun LessonPage(
-    id: String,
+    lessonId: String,
     onLearnClick: (id: String) -> Unit = {},
     onBackClick: () -> Unit = {}
 ) {
-    val vm = assistedMetroViewModel<LessonViewModel, LessonViewModel.Factory>(key = id) {
-        create(id)
+    val vm = assistedMetroViewModel<LessonViewModel, LessonViewModel.Factory>(key = lessonId) {
+        create(lessonId)
     }
     if (vm.loading || vm.error != null) {
         LoadingWidget(
@@ -76,7 +75,7 @@ fun LessonPage(
 
     LessonPageContent(
         lesson = vm.lesson!!,
-        onLearnClick = { onLearnClick(id) },
+        onLearnClick = { onLearnClick(lessonId) },
         onBackClick = onBackClick
     )
 }
