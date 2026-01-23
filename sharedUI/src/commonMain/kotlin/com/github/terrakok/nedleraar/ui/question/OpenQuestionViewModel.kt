@@ -10,27 +10,35 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.nedleraar.DataService
 import com.github.terrakok.nedleraar.Lesson
-import com.russhwolf.settings.Settings
 import dev.zacsweers.metro.*
 import dev.zacsweers.metrox.viewmodel.ManualViewModelAssistedFactory
 import dev.zacsweers.metrox.viewmodel.ManualViewModelAssistedFactoryKey
 import kotlinx.coroutines.launch
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Immutable
+@Serializable
 sealed interface Feedback {
     val answer: String
     val title: String
     val text: String
+    @Serializable
+    @SerialName("loading")
     data class Loading(
         override val answer: String,
         override val title: String = "",
         override val text: String = ""
     ) : Feedback
+    @Serializable
+    @SerialName("correct")
     data class Correct(
         override val answer: String,
         override val title: String,
         override val text: String
     ) : Feedback
+    @Serializable
+    @SerialName("incorrect")
     data class Incorrect(
         override val answer: String,
         override val title: String,
@@ -42,7 +50,7 @@ sealed interface Feedback {
 class OpenQuestionViewModel(
     @Assisted val lessonId: String,
     val dataService: DataService,
-    settings: Settings
+    stateStoreFactory: OpenQuestionStateStore.Factory
 ) : ViewModel() {
     @AssistedFactory
     @ManualViewModelAssistedFactoryKey(Factory::class)
@@ -64,7 +72,7 @@ class OpenQuestionViewModel(
 
     private val answers = mutableStateMapOf<String, MutableState<String>>()
     private val results = mutableStateMapOf<String, Feedback>()
-    private val stateStore = OpenQuestionStateStore(lessonId, settings, viewModelScope)
+    private val stateStore = stateStoreFactory.create(lessonId, viewModelScope)
 
     val question get() = lesson?.let { it.questions[currentQuestionIndex] } ?: error("Lesson is null")
     val answer get() = answers.getOrPut(question.id) { stateStore.createAnswerState(question.id) }
@@ -127,7 +135,6 @@ class OpenQuestionViewModel(
     }
 
     private fun restoreLessonState(lesson: Lesson) {
-        stateStore.clear()
         answers.clear()
         results.clear()
         lesson.questions.forEach { question ->

@@ -4,6 +4,9 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
 import com.russhwolf.settings.Settings
+import dev.zacsweers.metro.Assisted
+import dev.zacsweers.metro.AssistedFactory
+import dev.zacsweers.metro.AssistedInject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
@@ -11,21 +14,21 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 
-internal class OpenQuestionStateStore(
-    private val lessonId: String,
+class OpenQuestionStateStore @AssistedInject constructor(
+    @Assisted private val lessonId: String,
     private val settings: Settings,
-    private val scope: CoroutineScope,
+    private val json: Json,
+    @Assisted private val scope: CoroutineScope,
 ) {
     private val answerStates = mutableMapOf<String, MutableState<String>>()
-    private var answerScopeJob: Job? = null
-    private var answerScope: CoroutineScope? = null
-
-    fun clear() {
-        answerScopeJob?.cancel()
-        answerScopeJob = null
-        answerScope = null
-        answerStates.clear()
+    private val storedStates = mutableMapOf<String, StoredState>()
+    private val answerScope: CoroutineScope by lazy {
+        val parentJob = scope.coroutineContext[Job]
+        val job = SupervisorJob(parentJob)
+        CoroutineScope(scope.coroutineContext + job)
     }
 
     @OptIn(FlowPreview::class)
@@ -33,43 +36,35 @@ internal class OpenQuestionStateStore(
         val existing = answerStates[questionId]
         if (existing != null) return existing
 
-        val settingsKey = answerKey(questionId)
-        val state = mutableStateOf(settings.getString(settingsKey, ""))
+        val storedState = restoreStoredState(questionId)
+        val state = mutableStateOf(storedState.answer)
         answerStates[questionId] = state
-        answerScope().launch {
+        answerScope.launch {
             snapshotFlow { state.value }
                 .debounce(ANSWER_SAVE_DEBOUNCE_MS)
                 .distinctUntilChanged()
                 .collect { value ->
-                    settings.putString(settingsKey, value)
+                    updateStoredState(questionId) { existingState ->
+                        existingState.copy(answer = value)
+                    }
                 }
         }
         return state
     }
 
     fun restoreFeedback(questionId: String): Feedback? {
-        val type = settings.getString(feedbackKey(questionId, FEEDBACK_TYPE_KEY), "")
-        if (type.isBlank()) return null
-        val answer = settings.getString(feedbackKey(questionId, FEEDBACK_ANSWER_KEY), "")
-        val title = settings.getString(feedbackKey(questionId, FEEDBACK_TITLE_KEY), "")
-        val text = settings.getString(feedbackKey(questionId, FEEDBACK_TEXT_KEY), "")
-        return when (type) {
-            FEEDBACK_TYPE_CORRECT -> Feedback.Correct(answer, title, text)
-            FEEDBACK_TYPE_INCORRECT -> Feedback.Incorrect(answer, title, text)
-            else -> null
-        }
+        val feedback = restoreStoredState(questionId).feedback
+        return if (feedback is Feedback.Loading) null else feedback
     }
 
     fun saveFeedback(questionId: String, feedback: Feedback) {
-        val type = when (feedback) {
-            is Feedback.Correct -> FEEDBACK_TYPE_CORRECT
-            is Feedback.Incorrect -> FEEDBACK_TYPE_INCORRECT
-            is Feedback.Loading -> return
+        if (feedback is Feedback.Loading) return
+        updateStoredState(questionId) { existing ->
+            existing.copy(
+                answer = answerStates[questionId]?.value ?: existing.answer,
+                feedback = feedback
+            )
         }
-        settings.putString(feedbackKey(questionId, FEEDBACK_TYPE_KEY), type)
-        settings.putString(feedbackKey(questionId, FEEDBACK_ANSWER_KEY), feedback.answer)
-        settings.putString(feedbackKey(questionId, FEEDBACK_TITLE_KEY), feedback.title)
-        settings.putString(feedbackKey(questionId, FEEDBACK_TEXT_KEY), feedback.text)
     }
 
     fun restoreLastQuestionIndex(totalQuestions: Int): Int {
@@ -82,32 +77,48 @@ internal class OpenQuestionStateStore(
         settings.putInt(lastQuestionKey(), index)
     }
 
-    private fun answerKey(questionId: String) = "$ANSWER_PREFIX.$lessonId.$questionId"
-    private fun feedbackKey(questionId: String, field: String) = "$FEEDBACK_PREFIX.$lessonId.$questionId.$field"
-    private fun lastQuestionKey() = "$LAST_QUESTION_PREFIX.$lessonId"
+    private fun restoreStoredState(questionId: String): StoredState {
+        if (storedStates.containsKey(questionId)) return storedStates[questionId]!!
 
-    private fun answerScope(): CoroutineScope {
-        val existing = answerScope
-        if (existing != null && answerScopeJob?.isActive == true) return existing
-        val parentJob = scope.coroutineContext[Job]
-        val job = SupervisorJob(parentJob)
-        val newScope = CoroutineScope(scope.coroutineContext + job)
-        answerScopeJob = job
-        answerScope = newScope
-        return newScope
+        val storedJson = settings.getString(stateKey(questionId), "")
+        val restored = if (storedJson.isBlank()) {
+            StoredState()
+        } else {
+            runCatching { json.decodeFromString<StoredState>(storedJson) }
+                .getOrElse { StoredState() }
+        }
+        storedStates[questionId] = restored
+        return restored
     }
 
+    private fun updateStoredState(questionId: String, transform: (StoredState) -> StoredState) {
+        val existing = restoreStoredState(questionId)
+        val updated = transform(existing)
+        storedStates[questionId] = updated
+        saveStoredState(questionId, updated)
+    }
+
+    private fun saveStoredState(questionId: String, state: StoredState) {
+        settings.putString(stateKey(questionId), json.encodeToString(state))
+    }
+
+    private fun stateKey(questionId: String) = "$STATE_PREFIX.$lessonId.$questionId"
+    private fun lastQuestionKey() = "$LAST_QUESTION_PREFIX.$lessonId"
+
     private companion object {
-        private const val ANSWER_PREFIX = "open_question.answer"
-        private const val FEEDBACK_PREFIX = "open_question.feedback"
+        private const val STATE_PREFIX = "open_question.state"
         private const val LAST_QUESTION_PREFIX = "open_question.last_index"
-        private const val FEEDBACK_TYPE_KEY = "type"
-        private const val FEEDBACK_TITLE_KEY = "title"
-        private const val FEEDBACK_TEXT_KEY = "text"
-        private const val FEEDBACK_ANSWER_KEY = "answer"
-        private const val FEEDBACK_TYPE_CORRECT = "correct"
-        private const val FEEDBACK_TYPE_INCORRECT = "incorrect"
         private const val ANSWER_SAVE_DEBOUNCE_MS = 500L
     }
 
+    @Serializable
+    internal data class StoredState(
+        val answer: String = "",
+        val feedback: Feedback? = null
+    )
+
+    @AssistedFactory
+    interface Factory {
+        fun create(lessonId: String, scope: CoroutineScope): OpenQuestionStateStore
+    }
 }
