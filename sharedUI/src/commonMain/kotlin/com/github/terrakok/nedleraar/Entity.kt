@@ -43,15 +43,17 @@ enum class FeedbackStatus {
     OUTDATED
 }
 
+@Serializable
 data class FeedbackResult(
     val title: String,
     val message: String,
     val isCorrect: Boolean
 )
 
+@Serializable
 data class Feedback(
     val answer: String,
-    val result: FeedbackResult? = null,
+    val result: FeedbackResult?,
     val status: FeedbackStatus
 )
 

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
+import com.russhwolf.settings.Settings
 import dev.zacsweers.metro.*
 import dev.zacsweers.metrox.viewmodel.*
 import io.ktor.client.*
@@ -12,6 +13,9 @@ import io.ktor.client.plugins.cache.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.logging.*
 import io.ktor.serialization.kotlinx.json.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.serialization.json.Json
 import kotlin.reflect.KClass
 
@@ -26,6 +30,15 @@ internal interface AppGraph: ViewModelGraph {
         isLenient = true
         explicitNulls = false
     }
+
+    @SingleIn(AppScope::class)
+    @Provides
+    fun provideSettings(): Settings = Settings()
+
+    @SingleIn(AppScope::class)
+    @Provides
+    fun provideAppCoroutineScope(): CoroutineScope =
+        CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     @SingleIn(AppScope::class)
     @Provides

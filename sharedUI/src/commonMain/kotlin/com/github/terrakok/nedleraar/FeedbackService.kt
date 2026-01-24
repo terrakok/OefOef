@@ -1,26 +1,64 @@
 package com.github.terrakok.nedleraar
 
+import com.russhwolf.settings.Settings
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 
+@OptIn(FlowPreview::class)
+@SingleIn(AppScope::class)
 @Inject
 class FeedbackService(
-    val dataService: DataService
+    private val dataService: DataService,
+    private val settings: Settings,
+    private val json: Json,
+    appCoroutineScope: CoroutineScope
 ) {
+    companion object {
+        private const val FEEDBACK_STATE_KEY = "com.github.terrakok.nedleraar.saved_feedback_key"
+    }
+
     private val feedbackSynchronizedObject = SynchronizedObject()
-    private val feedbackData = mutableMapOf<String, Feedback>()
+    private val feedbackData = mutableMapOf<String, Feedback>().also { initState ->
+        val saved = settings.getStringOrNull(FEEDBACK_STATE_KEY)?.let { str ->
+            json.decodeFromString<Map<String, Feedback>>(str)
+        }
+        saved?.let { initState.putAll(it) }
+    }
 
     private val feedbackDataFlow: MutableSharedFlow<Map<String, Feedback>> = MutableSharedFlow(
         replay = 1,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
+
+    init {
+        appCoroutineScope.launch {
+            val saved = settings.getStringOrNull(FEEDBACK_STATE_KEY)
+            if (saved != null) {
+                Log.d("Restoring feedback state")
+                feedbackData.putAll(json.decodeFromString<Map<String, Feedback>>(saved))
+                feedbackDataFlow.emit(feedbackData)
+            }
+            feedbackDataFlow.debounce(1000)
+                .collect {
+                    Log.d("Saving feedback state")
+                    settings.putString(FEEDBACK_STATE_KEY, json.encodeToString(it))
+                }
+        }
+    }
 
     private fun feedbackId(lessonId: String, questionId: String) = "$lessonId/$questionId"
 
