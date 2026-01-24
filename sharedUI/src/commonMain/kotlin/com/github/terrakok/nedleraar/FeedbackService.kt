@@ -107,6 +107,7 @@ class FeedbackService(
         val prev = getFeedback(lessonId, questionId)
         if (prev.answer.isBlank()) {
             saveFeedback(lessonId, questionId, null)
+            return
         }
 
         try {
