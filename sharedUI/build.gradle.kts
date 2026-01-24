@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
@@ -19,7 +17,6 @@ kotlin {
     js { browser() }
     wasmJs { browser() }
 
-    iosX64()
     iosArm64()
     iosSimulatorArm64()
 
