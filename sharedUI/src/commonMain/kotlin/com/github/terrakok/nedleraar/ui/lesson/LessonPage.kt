@@ -88,6 +88,7 @@ private fun LessonPageContent(
     onBackClick: () -> Unit = {},
 ) {
     Scaffold(
+        contentWindowInsets = WindowInsets.safeDrawing.exclude(WindowInsets.navigationBars),
         containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
             TopAppBar(
@@ -286,7 +287,7 @@ private fun TextSegmentItem(
         ) {
             Text(
                 text = secondsToText(transcriptionItem.time),
-                style = MaterialTheme.typography.labelSmall.copy(
+                style = MaterialTheme.typography.labelMedium.copy(
                     fontWeight = FontWeight.Bold,
                     color = timestampColor
                 ),
@@ -295,7 +296,7 @@ private fun TextSegmentItem(
             Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = transcriptionItem.text,
-                style = MaterialTheme.typography.bodySmall.copy(
+                style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = fontWeight,
                     color = MaterialTheme.colorScheme.onSurface
                 ),

@@ -139,6 +139,7 @@ private fun WelcomeTopBar() {
         modifier = Modifier
             .background(MaterialTheme.colorScheme.surface)
             .fillMaxWidth()
+            .windowInsetsPadding(WindowInsets.systemBars.exclude(WindowInsets.navigationBars))
             .padding(horizontal = 24.dp, vertical = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically

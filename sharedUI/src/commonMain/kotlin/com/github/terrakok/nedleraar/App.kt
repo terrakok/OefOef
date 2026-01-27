@@ -4,7 +4,10 @@ import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
@@ -46,7 +49,9 @@ fun App(
 
         NavDisplay(
             backStack = backStack,
-            modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceContainerLowest),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surfaceContainerLowest),
             sceneStrategy = rememberSplitSceneStrategy(),
             transitionSpec = { ContentTransform(EnterTransition.None, ExitTransition.None) },
             popTransitionSpec = { ContentTransform(EnterTransition.None, ExitTransition.None) },
