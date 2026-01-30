@@ -25,6 +25,8 @@ class WelcomeViewModel(
 
     var loading by mutableStateOf(false)
         private set
+    var isRefreshing by mutableStateOf(false)
+        private set
     var error by mutableStateOf<String?>(null)
         private set
 
@@ -43,6 +45,21 @@ class WelcomeViewModel(
                 error = e.message
             } finally {
                 loading = false
+            }
+        }
+    }
+
+    fun refresh() {
+        viewModelScope.launch {
+            try {
+                isRefreshing = true
+                val freshList = dataService.getLessons(forceRefresh = true)
+                items.clear()
+                items.addAll(freshList)
+            } catch (e: Throwable) {
+                error = e.message
+            } finally {
+                isRefreshing = false
             }
         }
     }
