@@ -12,7 +12,9 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.time.measureTimedValue
 
 @ContributesIntoMap(AppScope::class)
 @ViewModelKey(WelcomeViewModel::class)
@@ -53,7 +55,13 @@ class WelcomeViewModel(
         viewModelScope.launch {
             try {
                 isRefreshing = true
-                val freshList = dataService.getLessons(forceRefresh = true)
+                val (freshList, duration) = measureTimedValue {
+                    dataService.getLessons(forceRefresh = true)
+                }
+                if (duration.inWholeMilliseconds < 300) {
+                    // A delay for smoother refresh UX (otherwise the indicator disappears to fast)
+                    delay(500 - duration.inWholeMilliseconds)
+                }
                 items.clear()
                 items.addAll(freshList)
             } catch (e: Throwable) {

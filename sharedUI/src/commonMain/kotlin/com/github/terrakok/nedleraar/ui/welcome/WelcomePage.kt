@@ -8,11 +8,8 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
@@ -24,7 +21,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.github.terrakok.nedleraar.LessonHeader
 import com.github.terrakok.nedleraar.ui.Icons
@@ -94,8 +90,7 @@ fun WelcomePageContent(
         },
         containerColor = MaterialTheme.colorScheme.surface
     ) { paddingValues ->
-
-        PullToRefreshBox(
+        PullToRefreshBoxTouchOnly(
             isRefreshing = isRefreshing,
             onRefresh = onPullToRefresh,
             state = ptrState,
