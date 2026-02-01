@@ -1,4 +1,4 @@
-rootProject.name = "NedLeraar"
+rootProject.name = "OefOef"
 
 pluginManagement {
     repositories {

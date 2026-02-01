@@ -7,14 +7,14 @@ plugins {
 }
 
 android {
-    namespace = "com.github.terrakok.nedleraar.androidApp"
+    namespace = "com.github.terrakok.oefoef.androidApp"
     compileSdk = 36
 
     defaultConfig {
         minSdk = 23
         targetSdk = 36
 
-        applicationId = "com.github.terrakok.nedleraar.androidApp"
+        applicationId = "com.github.terrakok.oefoef.androidApp"
         versionCode = 1
         versionName = "1.0.0"
     }

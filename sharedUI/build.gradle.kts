@@ -95,7 +95,7 @@ dependencies {
     debugImplementation(libs.compose.ui.tooling)
 }
 android {
-    namespace = "com.github.terrakok.nedleraar"
+    namespace = "com.github.terrakok.oefoef"
     compileSdk = 36
     defaultConfig {
         minSdk = 23

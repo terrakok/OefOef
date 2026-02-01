@@ -3,11 +3,11 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import java.awt.Dimension
-import com.github.terrakok.nedleraar.App
+import com.github.terrakok.oefoef.App
 
 fun main() = application {
     Window(
-        title = "NedLeraar",
+        title = "OefOef",
         state = rememberWindowState(width = 800.dp, height = 600.dp),
         onCloseRequest = ::exitApplication,
     ) {

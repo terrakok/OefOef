@@ -16,7 +16,7 @@ compose.desktop {
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "NedLeraar"
+            packageName = "OefOef"
             packageVersion = "1.0.0"
 
             linux {
@@ -27,7 +27,7 @@ compose.desktop {
             }
             macOS {
                 iconFile.set(project.file("appIcons/MacosIcon.icns"))
-                bundleID = "com.github.terrakok.nedleraar.desktopApp"
+                bundleID = "com.github.terrakok.oefoef.desktopApp"
             }
         }
     }
