@@ -44,7 +44,6 @@ internal interface AppGraph: ViewModelGraph {
     @Provides
     fun provideHttpClient(json: Json): HttpClient = HttpClient {
         install(ContentNegotiation) { json(json) }
-        install(HttpCache)
         install(Logging) {
             logger = object : Logger {
                 override fun log(message: String) {
