@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -29,6 +30,8 @@ import dev.zacsweers.metrox.viewmodel.metroViewModel
 
 import androidx.compose.ui.tooling.preview.Preview
 import com.github.terrakok.oefoef.ui.AppTheme
+import oefoef.sharedui.generated.resources.Res
+import org.jetbrains.compose.resources.painterResource
 import kotlin.time.Clock
 
 @Preview
@@ -127,25 +130,74 @@ fun WelcomePageContent(
 @Composable
 private fun Header() {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 24.dp),
+        modifier = Modifier.width(IntrinsicSize.Min),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Leer Nederlands",
-            style = MaterialTheme.typography.displaySmall.copy(
+            text = "Master Dutch through",
+            style = MaterialTheme.typography.displayMedium.copy(
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
-            )
+            ),
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = "Real News and Podcasts",
+            style = MaterialTheme.typography.displayMedium.copy(
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.secondary
+            ),
+            textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Verbeter je taalvaardigheid met interactieve videolessen",
+            text = "Listen, watch, and answer the questions.\n" +
+                    "Constantly new videos and questions!\n" +
+                    "The app is free and open source!\n" +
+                    "To support its operation and improve the service.",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
             textAlign = TextAlign.Center
         )
+        Spacer(modifier = Modifier.height(16.dp))
+        Row {
+            val uriHandler = LocalUriHandler.current
+            OutlinedButton(
+                onClick = { uriHandler.openUri("https://github.com/terrakok/OefOef") },
+                shape = RoundedCornerShape(8.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        modifier = Modifier.size(20.dp),
+                        imageVector = Icons.Github,
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(text = "SOURCES")
+                }
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Button(
+                onClick = { uriHandler.openUri("https://github.com/terrakok/OefOef") }, //todo
+                shape = RoundedCornerShape(8.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        modifier = Modifier.size(20.dp),
+                        imageVector = Icons.DonateBox,
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(text = "DONATE")
+                }
+            }
+        }
         Spacer(modifier = Modifier.height(48.dp))
     }
 }
