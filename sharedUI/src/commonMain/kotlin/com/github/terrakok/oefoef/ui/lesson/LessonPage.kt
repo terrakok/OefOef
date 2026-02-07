@@ -2,6 +2,7 @@ package com.github.terrakok.oefoef.ui.lesson
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -14,7 +15,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.changedToUp
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -26,9 +31,7 @@ import com.github.terrakok.oefoef.ui.Icons
 import com.github.terrakok.oefoef.ui.LoadingWidget
 import com.github.terrakok.oefoef.ui.LocalIsSplitMode
 import dev.zacsweers.metrox.viewmodel.assistedMetroViewModel
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.launch
 import kotlin.time.Clock
 
 @Preview
@@ -42,8 +45,8 @@ private fun LessonPagePreview() {
                 previewUrl = "https://i.ytimg.com/vi/SgXPCcK22h4/hqdefault.jpg",
                 videoId = "",
                 videoTranscription = listOf(
-                    TranscriptionItem(1, "Hello world!"),
-                    TranscriptionItem(2, "How are you?"),
+                    TranscriptionItem(1, "Hello world!", "Hello world!"),
+                    TranscriptionItem(2, "How are you?", "How are you?"),
                 ),
                 lengthSeconds = 0,
                 questions = emptyList(),
@@ -117,15 +120,6 @@ private fun LessonPageContent(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                },
-                actions = {
-                    IconButton(onClick = {}) {
-                        Icon(
-                            imageVector = Icons.Translate,
-                            contentDescription = "Translate",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
                 }
             )
         }
@@ -146,11 +140,19 @@ private fun LessonPageContent(
                     previewUrl = lesson.previewUrl
                 )
                 Spacer(modifier = Modifier.height(32.dp))
-                Text(
-                    text = "TRANSCRIPT",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.outline
-                )
+                Row {
+                    Text(
+                        text = "TRANSCRIPT",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(
+                        text = "(Long tap to translate)",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                }
                 Spacer(modifier = Modifier.height(16.dp))
 
                 val state = rememberLazyListState()
@@ -270,10 +272,28 @@ private fun TextSegmentItem(
     val timestampColor =
         if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
     val fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal
+    val haptics = LocalHapticFeedback.current
+    var showTranslation by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(10.dp))
-            .clickable(onClick = onClick)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    showTranslation = true
+                }
+            )
+            .pointerInput(Unit) {
+                awaitPointerEventScope {
+                    while (true) {
+                        val event = awaitPointerEvent()
+                        if (event.changes.all { it.changedToUp() }) {
+                            showTranslation = false
+                        }
+                    }
+                }
+            }
             .background(if (isActive) MaterialTheme.colorScheme.primary else Color.Transparent)
             .padding(start = 4.dp)
     ) {
@@ -283,7 +303,6 @@ private fun TextSegmentItem(
                 .clip(RoundedCornerShape(10.dp))
                 .background(if (isActive) MaterialTheme.colorScheme.tertiaryContainer else Color.Transparent)
                 .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = secondsToText(transcriptionItem.time),
@@ -291,16 +310,18 @@ private fun TextSegmentItem(
                     fontWeight = FontWeight.Bold,
                     color = timestampColor
                 ),
-                modifier = Modifier.width(48.dp)
+                modifier = Modifier.width(48.dp).alignByBaseline()
             )
             Spacer(modifier = Modifier.width(12.dp))
             Text(
-                text = transcriptionItem.text,
+                text =
+                    if (!showTranslation) transcriptionItem.text
+                    else transcriptionItem.translationEn,
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = fontWeight,
                     color = MaterialTheme.colorScheme.onSurface
                 ),
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f).alignByBaseline()
             )
         }
     }

@@ -27,7 +27,8 @@ data class Lesson(
 
 data class TranscriptionItem(
     val time: Int,
-    val text: String
+    val text: String,
+    val translationEn: String
 )
 
 data class OpenQuestion(

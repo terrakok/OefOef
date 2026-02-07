@@ -56,9 +56,11 @@ class DataService(
             val jo = httpClient.get(LESSONS_COLLECTION_URL + "items/${id}.json").body<JsonObject>()
             val transcription = jo.getValue("transcriptionSentences").jsonArray.map { item ->
                 val jo = item.jsonObject
+                val text = jo.getValue("text").jsonPrimitive.content
                 TranscriptionItem(
                     time = jo.getValue("start").jsonPrimitive.float.toInt(),
-                    text = jo.getValue("text").jsonPrimitive.content
+                    text = text,
+                    translationEn = text //todo
                 )
             }
             val practice = jo.getValue("practice").jsonObject
