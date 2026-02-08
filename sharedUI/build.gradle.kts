@@ -15,7 +15,10 @@ kotlin {
 
     jvm()
 
-    js { browser() }
+    js {
+        useCommonJs()
+        browser()
+    }
     wasmJs { browser() }
 
     iosArm64()
