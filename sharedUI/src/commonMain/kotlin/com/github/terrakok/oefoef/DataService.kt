@@ -95,7 +95,7 @@ class DataService(
         lessonId: String,
         questionId: String,
         answer: String
-    ): String {
+    ): CheckAnswerResponse {
         val lang = getLesson(lessonId).lang
         val jo = httpClient.get(API_URL + "check_answer", {
             parameter("lessonId", lessonId)
@@ -106,9 +106,14 @@ class DataService(
         }).body<JsonObject>()
 
         if (jo.containsKey("error") && jo["error"] != null) {
-            return jo.getValue("error").jsonPrimitive.content
+            return CheckAnswerResponse(error = jo.getValue("error").jsonPrimitive.content)
         }
 
-        return jo.getValue("result").jsonPrimitive.content
+        return CheckAnswerResponse(result = jo.getValue("result").jsonPrimitive.content)
     }
+
+    data class CheckAnswerResponse(
+        val result: String? = null,
+        val error: String? = null
+    )
 }

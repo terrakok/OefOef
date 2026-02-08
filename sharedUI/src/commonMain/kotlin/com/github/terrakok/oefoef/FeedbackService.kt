@@ -112,8 +112,8 @@ class FeedbackService(
 
         try {
             saveFeedback(lessonId, questionId, prev.copy(status = FeedbackStatus.LOADING))
-            val feedbackStr = dataService.checkAnswer(lessonId, questionId, prev.answer)
-            val feedback = Feedback(prev.answer, processFeedback(feedbackStr), FeedbackStatus.ACTUAL)
+            val feedbackResponse = dataService.checkAnswer(lessonId, questionId, prev.answer)
+            val feedback = Feedback(prev.answer, processFeedback(feedbackResponse), FeedbackStatus.ACTUAL)
             saveFeedback(lessonId, questionId, feedback)
         } catch (e: Throwable) {
             saveFeedback(
@@ -128,14 +128,16 @@ class FeedbackService(
         }
     }
 
-    private suspend fun processFeedback(text: String): FeedbackResult = withContext(Dispatchers.Default) {
-        if (!text.contains("Score:")) {
-            FeedbackResult("Try again", "Unknown error", false)
-        } else {
-            val regex = Regex("""Score:\s*([0-9]+(?:\.[0-9]+)?)\s*/\s*([0-9]+(?:\.[0-9]+)?)""")
-            val match = regex.find(text)
-            val score = match?.destructured?.component1()?.toFloatOrNull() ?: 0f
-            FeedbackResult("Good", text, score >= 3f)
+    private suspend fun processFeedback(response: DataService.CheckAnswerResponse): FeedbackResult =
+        withContext(Dispatchers.Default) {
+            if (response.error != null) {
+                FeedbackResult("Try again", "Unknown error", false)
+            } else {
+                val regex = Regex("""Score:\s*([0-9]+(?:\.[0-9]+)?)\s*/\s*([0-9]+(?:\.[0-9]+)?)""")
+                val match = regex.find(response.result ?: "")
+                val score = match?.destructured?.component1()?.toFloatOrNull() ?: 0f
+                val title = if (score > 2) "Good" else "Improve your answer"
+                FeedbackResult(title, response.result ?: "No feedback", score >= 3f)
+            }
         }
-    }
 }
