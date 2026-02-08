@@ -57,10 +57,15 @@ class DataService(
             val transcription = jo.getValue("transcriptionSentences").jsonArray.map { item ->
                 val jo = item.jsonObject
                 val text = jo.getValue("text").jsonPrimitive.content
+                val translation = if (jo.containsKey("translation")) {
+                    jo.getValue("translation").jsonPrimitive.content
+                } else {
+                    text
+                }
                 TranscriptionItem(
                     time = jo.getValue("start").jsonPrimitive.float.toInt(),
                     text = text,
-                    translationEn = text //todo
+                    translationEn = translation
                 )
             }
             val practice = jo.getValue("practice").jsonObject
