@@ -58,6 +58,7 @@ internal interface AppGraphBase: ViewModelGraph {
     }
 }
 
+// Allow platforms to extend the base graph and override defaults
 internal expect fun createAppGraph(): AppGraphBase
 
 @Composable

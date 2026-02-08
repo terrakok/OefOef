@@ -95,12 +95,7 @@ fun OpenQuestionPage(
 
             var feedback by remember { mutableStateOf(EmptyFeedback()) }
             LaunchedEffect(vm.currentQuestionIndex) {
-                vm.feedback.collect {
-                    feedback = it
-                    if (feedback.spellcheck?.incorrectWords?.isNotEmpty() == true) {
-                        println(feedback.spellcheck?.incorrectWords?.joinToString(", "))
-                    }
-                }
+                vm.feedback.collect { feedback = it }
             }
 
             val isFeedbackLoading = feedback.status == FeedbackStatus.LOADING
