@@ -2,26 +2,23 @@ package com.github.terrakok.oefoef.ui.question
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.terrakok.oefoef.EmptyFeedback
@@ -107,7 +104,20 @@ fun OpenQuestionPage(
             }
 
             val isFeedbackLoading = feedback.status == FeedbackStatus.LOADING
-            TextField(
+            var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
+            val incorrectWords = feedback.spellcheck?.incorrectWords ?: emptyList()
+
+            val interactionSource = remember { MutableInteractionSource() }
+            val colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
+                disabledContainerColor = Color.Transparent,
+                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                unfocusedIndicatorColor = MaterialTheme.colorScheme.outlineVariant,
+            )
+
+            // Use BasicTextField to have onTextLayout
+            BasicTextField(
                 enabled = !isFeedbackLoading,
                 value = feedback.answer,
                 onValueChange = { vm.updateAnswer(it.replace('\n', ' ')) },
@@ -116,13 +126,36 @@ fun OpenQuestionPage(
                     fontSize = 20.sp,
                     color = MaterialTheme.colorScheme.onSurface
                 ),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    disabledContainerColor = Color.Transparent,
-                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unfocusedIndicatorColor = MaterialTheme.colorScheme.outlineVariant,
-                )
+                onTextLayout = { textLayoutResult = it },
+                decorationBox = { innerTextField ->
+                    TextFieldDefaults.DecorationBox(
+                        value = feedback.answer,
+                        innerTextField = {
+                            Box(
+                                modifier = Modifier.drawSpellingChecks(
+                                    textLayoutResult,
+                                    feedback.answer,
+                                    incorrectWords
+                                )
+                            ) {
+                                innerTextField()
+                            }
+                        },
+                        enabled = !isFeedbackLoading,
+                        singleLine = false,
+                        visualTransformation = VisualTransformation.None,
+                        interactionSource = interactionSource,
+                        colors = colors,
+                        container = {
+                            TextFieldDefaults.Container(
+                                enabled = !isFeedbackLoading,
+                                isError = false,
+                                interactionSource = interactionSource,
+                                colors = colors
+                            )
+                        }
+                    )
+                }
             )
 
             Spacer(modifier = Modifier.height(48.dp))
