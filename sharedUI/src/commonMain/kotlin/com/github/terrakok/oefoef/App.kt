@@ -22,6 +22,8 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.github.terrakok.oefoef.spellcheck.ClientSpellcheck
+import com.github.terrakok.oefoef.spellcheck.DisabledClientSpellCheck
 import com.github.terrakok.oefoef.ui.AppTheme
 import com.github.terrakok.oefoef.ui.SplitSceneStrategy
 import com.github.terrakok.oefoef.ui.lesson.LessonPage
@@ -32,8 +34,9 @@ import com.github.terrakok.oefoef.ui.welcome.WelcomePage
 @Preview
 @Composable
 fun App(
+    clientSpellcheck: ClientSpellcheck = DisabledClientSpellCheck(),
     onThemeChanged: @Composable (isDark: Boolean) -> Unit = {}
-) = WithAppGraph {
+) = WithAppGraph(clientSpellcheck) {
     AppTheme(onThemeChanged) {
         val backStack = remember { mutableStateListOf<AppNavKey>(WelcomeScreen) }
         BrowserNavigation(backStack)

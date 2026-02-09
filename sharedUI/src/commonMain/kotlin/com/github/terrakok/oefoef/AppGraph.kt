@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
+import com.github.terrakok.oefoef.spellcheck.ClientSpellcheck
+import com.github.terrakok.oefoef.spellcheck.DisabledClientSpellCheck
 import com.russhwolf.settings.Settings
 import dev.zacsweers.metro.*
 import dev.zacsweers.metrox.viewmodel.*
@@ -20,7 +22,8 @@ import kotlinx.serialization.json.Json
 import kotlin.reflect.KClass
 
 @SingleIn(AppScope::class)
-internal interface AppGraphBase: ViewModelGraph {
+@DependencyGraph(AppScope::class)
+internal interface AppGraph: ViewModelGraph {
     @SingleIn(AppScope::class)
     @Provides
     fun provideJson(): Json = Json {
@@ -56,16 +59,21 @@ internal interface AppGraphBase: ViewModelGraph {
             socketTimeoutMillis = 10000
         }
     }
-}
 
-// Allow platforms to extend the base graph and override defaults
-internal expect fun createAppGraph(): AppGraphBase
+    @DependencyGraph.Factory
+    interface Factory {
+        fun create(@Provides spellChecker: ClientSpellcheck): AppGraph
+    }
+}
 
 @Composable
 internal fun WithAppGraph(
+    clientSpellcheck: ClientSpellcheck,
     content: @Composable () -> Unit,
 ) {
-    val graph = remember { createAppGraph() }
+    val graph = remember {
+        createGraphFactory<AppGraph.Factory>().create(clientSpellcheck)
+    }
     CompositionLocalProvider(
         LocalMetroViewModelFactory provides graph.metroViewModelFactory
     ) {

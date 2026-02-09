@@ -16,7 +16,7 @@ kotlin {
     jvm()
 
     js {
-        useCommonJs()
+        useEsModules()
         browser()
     }
     wasmJs { browser() }

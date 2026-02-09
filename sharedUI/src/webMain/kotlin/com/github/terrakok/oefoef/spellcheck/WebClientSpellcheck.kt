@@ -1,9 +1,5 @@
 package com.github.terrakok.oefoef.spellcheck
 
-import dev.zacsweers.metro.AppScope
-import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metro.Inject
-import dev.zacsweers.metro.SingleIn
 import oefoef.sharedui.generated.resources.Res
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.toArray
@@ -15,10 +11,8 @@ private suspend fun readDictionary(name: String): String {
 private suspend fun createNSpell(): NSpell =
     nspell(readDictionary("nl.aff"), readDictionary("nl.dic"))
 
-@Inject
-@ContributesBinding(AppScope::class, replaces = [DisabledClientSpellCheck::class])
-@SingleIn(AppScope::class)
-internal class WebClientSpellcheck : ClientSpellcheck {
+
+class WebClientSpellcheck : ClientSpellcheck {
 
     override val enabled: Boolean = true
 

@@ -100,7 +100,7 @@ fun OpenQuestionPage(
 
             val isFeedbackLoading = feedback.status == FeedbackStatus.LOADING
             var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
-            val incorrectWords = feedback.spellcheck?.incorrectWords ?: emptyList()
+            val incorrectWords = feedback.spellcheck.incorrectWords
 
             val interactionSource = remember { MutableInteractionSource() }
             val colors = TextFieldDefaults.colors(
