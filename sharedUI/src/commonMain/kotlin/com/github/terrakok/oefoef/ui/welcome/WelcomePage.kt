@@ -181,7 +181,7 @@ private fun Header() {
             }
             Spacer(modifier = Modifier.width(16.dp))
             Button(
-                onClick = { uriHandler.openUri("https://github.com/terrakok/OefOef") }, //todo
+                onClick = { uriHandler.openUri("https://buymeacoffee.com/oefoefapp") },
                 shape = RoundedCornerShape(8.dp),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             ) {
