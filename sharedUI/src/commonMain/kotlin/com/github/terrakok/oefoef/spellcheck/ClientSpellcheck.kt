@@ -10,10 +10,6 @@ interface ClientSpellcheck {
     suspend fun correct(word: String): Boolean
     suspend fun suggest(word: String): List<String>
 }
-
-@Inject
-@ContributesBinding(AppScope::class)
-@SingleIn(AppScope::class)
 internal class DisabledClientSpellCheck : ClientSpellcheck {
     override val enabled: Boolean
         get() = false
