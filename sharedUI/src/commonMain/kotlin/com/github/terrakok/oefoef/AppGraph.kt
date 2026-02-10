@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
+import com.github.terrakok.oefoef.spellcheck.ClientSpellcheck
+import com.github.terrakok.oefoef.spellcheck.DisabledClientSpellCheck
 import com.russhwolf.settings.Settings
 import dev.zacsweers.metro.*
 import dev.zacsweers.metrox.viewmodel.*
@@ -57,13 +59,21 @@ internal interface AppGraph: ViewModelGraph {
             socketTimeoutMillis = 10000
         }
     }
+
+    @DependencyGraph.Factory
+    interface Factory {
+        fun create(@Provides spellChecker: ClientSpellcheck): AppGraph
+    }
 }
 
 @Composable
 internal fun WithAppGraph(
+    clientSpellcheck: ClientSpellcheck,
     content: @Composable () -> Unit,
 ) {
-    val graph = remember { createGraph<AppGraph>() }
+    val graph = remember {
+        createGraphFactory<AppGraph.Factory>().create(clientSpellcheck)
+    }
     CompositionLocalProvider(
         LocalMetroViewModelFactory provides graph.metroViewModelFactory
     ) {

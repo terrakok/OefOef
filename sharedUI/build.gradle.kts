@@ -15,7 +15,10 @@ kotlin {
 
     jvm()
 
-    js { browser() }
+    js {
+        useEsModules()
+        browser()
+    }
     wasmJs { browser() }
 
     iosArm64()
@@ -74,6 +77,7 @@ kotlin {
 
         webMain.dependencies {
             implementation(libs.navigation3.browser)
+            implementation(npm("nspell", "2.1.5")) // spell checker
         }
 
     }
