@@ -8,10 +8,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.HtmlElementView
-import androidx.compose.ui.viewinterop.WebElementView
 import kotlinx.browser.document
 import kotlinx.browser.window
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.dom.appendElement
 import org.w3c.dom.HTMLDivElement
@@ -48,9 +46,24 @@ actual fun YouTubeWidget(
                     seekTo(position)
                 }
             }
+            launch {
+                for (pauseOrResume in controller.setPauseResumeRequests) {
+                    when (pauseOrResume) {
+                        YouTubeController.SetPauseResume.PAUSE -> setOnPause()
+                        YouTubeController.SetPauseResume.RESUME -> resumePlayer()
+                    }
+                }
+            }
         }
         DisposableEffect(Unit) {
+            controller.setYTPlayerStateGetter {
+                val stateValue = getPlayerState()
+                YouTubeController.YTPlayerState.entries.find {
+                    it.value == stateValue
+                }
+            }
             onDispose {
+                controller.setYTPlayerStateGetter(null)
                 releaseYoutubePlayer()
             }
         }
@@ -71,6 +84,19 @@ private fun seekTo(seconds: Int) {
 private fun releaseYoutubePlayer() {
     js("releaseYoutubePlayer()")
 }
+
+@OptIn(ExperimentalWasmJsInterop::class)
+private fun setOnPause() {
+    js("pauseYTPlayer()")
+}
+
+@OptIn(ExperimentalWasmJsInterop::class)
+private fun resumePlayer() {
+    js("resumeYTPlayer()")
+}
+
+@OptIn(ExperimentalWasmJsInterop::class)
+private fun getPlayerState(): Int = js("getYtPlayerState()")
 
 private fun jsPlayer(videoId: String) = """
     var progressListener;
@@ -94,6 +120,18 @@ private fun jsPlayer(videoId: String) = """
     function seekYoutubeTo(seconds) {
       seekToSeconds = seconds;
       if (player) player.seekTo(seconds, true);
+    }
+    
+    function getYtPlayerState() {   
+        return player.getPlayerState(); // YT.PlayerState
+    }
+    
+    function pauseYTPlayer() {
+        player.pauseVideo();
+    }
+    
+    function resumeYTPlayer() {
+        player.playVideo();
     }
     
     function configurePlayer() {

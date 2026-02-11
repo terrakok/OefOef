@@ -132,6 +132,7 @@ private fun LessonPageContent(
             Column {
                 val playerController = remember { YouTubeController() }
                 val videoProgress by playerController.progress.receiveAsFlow().collectAsState(0)
+                var isTemporaryPaused by remember { mutableStateOf(false) }
 
                 Spacer(modifier = Modifier.height(16.dp))
                 VideoPlayerPlaceholder(
@@ -180,6 +181,17 @@ private fun LessonPageContent(
                         TextSegmentItem(
                             transcriptionItem = textSegment,
                             onClick = { playerController.seekTo(textSegment.time) },
+                            onLongPress = { isInLongPress ->
+                                if (isInLongPress && playerController.isPlaying()) {
+                                    // temporarily pause if it was playing
+                                    playerController.setPauseOrResume(YouTubeController.SetPauseResume.PAUSE)
+                                    isTemporaryPaused = true
+                                } else if (!isInLongPress && isTemporaryPaused) {
+                                    // resume only if it was playing before long press started
+                                    playerController.setPauseOrResume(YouTubeController.SetPauseResume.RESUME)
+                                    isTemporaryPaused = false
+                                }
+                            },
                             isActive = index == activeSegmentIndex
                         )
                     }
@@ -267,6 +279,7 @@ private fun VideoPlayerPlaceholder(
 private fun TextSegmentItem(
     transcriptionItem: TranscriptionItem,
     onClick: () -> Unit,
+    onLongPress: (Boolean) -> Unit = {},
     isActive: Boolean
 ) {
     val timestampColor =
@@ -274,6 +287,7 @@ private fun TextSegmentItem(
     val fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal
     val haptics = LocalHapticFeedback.current
     var showTranslation by remember { mutableStateOf(false) }
+    var hadLongPress by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(10.dp))
@@ -282,6 +296,8 @@ private fun TextSegmentItem(
                 onLongClick = {
                     haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                     showTranslation = true
+                    hadLongPress = true
+                    onLongPress(true)
                 }
             )
             .pointerInput(Unit) {
@@ -289,6 +305,10 @@ private fun TextSegmentItem(
                     while (true) {
                         val event = awaitPointerEvent()
                         if (event.changes.all { it.changedToUp() }) {
+                            if (hadLongPress) {
+                                onLongPress(false)
+                            }
+                            hadLongPress = false
                             showTranslation = false
                         }
                     }
