@@ -180,7 +180,8 @@ private fun LessonPageContent(
                         TextSegmentItem(
                             transcriptionItem = textSegment,
                             onClick = { playerController.seekTo(textSegment.time) },
-                            isActive = index == activeSegmentIndex
+                            isActive = index == activeSegmentIndex,
+                            onHold = { playerController.setOnPause(it) }
                         )
                     }
                     item {
@@ -267,13 +268,17 @@ private fun VideoPlayerPlaceholder(
 private fun TextSegmentItem(
     transcriptionItem: TranscriptionItem,
     onClick: () -> Unit,
-    isActive: Boolean
+    isActive: Boolean,
+    onHold: (Boolean) -> Unit = {}
 ) {
-    val timestampColor =
-        if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
+    val timestampColor = if (isActive) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
+    }
     val fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal
     val haptics = LocalHapticFeedback.current
-    var showTranslation by remember { mutableStateOf(false) }
+    var onHoldItem by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(10.dp))
@@ -281,7 +286,8 @@ private fun TextSegmentItem(
                 onClick = onClick,
                 onLongClick = {
                     haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                    showTranslation = true
+                    onHoldItem = true
+                    onHold(true)
                 }
             )
             .pointerInput(Unit) {
@@ -289,7 +295,10 @@ private fun TextSegmentItem(
                     while (true) {
                         val event = awaitPointerEvent()
                         if (event.changes.all { it.changedToUp() }) {
-                            showTranslation = false
+                            if (onHoldItem) {
+                                onHoldItem = false
+                                onHold(false)
+                            }
                         }
                     }
                 }
@@ -315,7 +324,7 @@ private fun TextSegmentItem(
             Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text =
-                    if (!showTranslation) transcriptionItem.text
+                    if (!onHoldItem) transcriptionItem.text
                     else transcriptionItem.translationEn,
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = fontWeight,

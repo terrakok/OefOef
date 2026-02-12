@@ -8,10 +8,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.HtmlElementView
-import androidx.compose.ui.viewinterop.WebElementView
 import kotlinx.browser.document
 import kotlinx.browser.window
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.dom.appendElement
 import org.w3c.dom.HTMLDivElement
@@ -48,6 +46,11 @@ actual fun YouTubeWidget(
                     seekTo(position)
                 }
             }
+            launch {
+                for (pause in controller.pauses) {
+                    pausePlayer(pause)
+                }
+            }
         }
         DisposableEffect(Unit) {
             onDispose {
@@ -65,6 +68,11 @@ private fun setYoutubeProgressListener(callback: (Int) -> Unit) {
 @OptIn(ExperimentalWasmJsInterop::class)
 private fun seekTo(seconds: Int) {
     js("seekYoutubeTo(seconds)")
+}
+
+@OptIn(ExperimentalWasmJsInterop::class)
+private fun pausePlayer(pause: Boolean) {
+    js("pauseYoutubePlayer(pause)")
 }
 
 @OptIn(ExperimentalWasmJsInterop::class)
@@ -88,6 +96,21 @@ private fun jsPlayer(videoId: String) = """
           progressListener(currentTime);
         }
       }, 100);
+    }
+    
+    var wasPlayingBeforePause = false;
+    function pauseYoutubePlayer(pause) {
+      if (player) {
+        var currentState = player.getPlayerState();
+        var isPlaying = currentState == YT.PlayerState.PLAYING;
+        if (pause && isPlaying) {
+          wasPlayingBeforePause = true;
+          player.pauseVideo();
+        } else if (!pause && wasPlayingBeforePause) {
+          wasPlayingBeforePause = false;
+          player.playVideo();
+        }
+      }
     }
     
     var seekToSeconds = 0;
