@@ -29,9 +29,8 @@ import com.github.terrakok.oefoef.ui.LoadingWidget
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 
 import androidx.compose.ui.tooling.preview.Preview
+import com.github.terrakok.oefoef.MAILTO_LINK
 import com.github.terrakok.oefoef.ui.AppTheme
-import oefoef.sharedui.generated.resources.Res
-import org.jetbrains.compose.resources.painterResource
 import kotlin.time.Clock
 
 @Preview
@@ -202,40 +201,49 @@ private fun Header() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun WelcomeTopBar() {
-    Row(
-        modifier = Modifier
-            .background(MaterialTheme.colorScheme.surface)
-            .fillMaxWidth()
-            .windowInsetsPadding(WindowInsets.systemBars.exclude(WindowInsets.navigationBars))
-            .padding(horizontal = 24.dp, vertical = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colorScheme.primaryContainer),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.School,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
+    TopAppBar(
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.School,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    text = "OefOef",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(
-                text = "OefOef",
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurface
-            )
+        },
+        actions = {
+            val uriHandler = LocalUriHandler.current
+            IconButton(
+                onClick = {
+                    uriHandler.openUri("$MAILTO_LINK%3Cwrite%20something%20here%3E")
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.EmailHeart,
+                    contentDescription = "Support",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
-    }
+    )
 }
 
 @Composable

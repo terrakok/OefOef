@@ -16,11 +16,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.github.terrakok.oefoef.MAILTO_LINK
 import com.github.terrakok.oefoef.EmptyFeedback
 import com.github.terrakok.oefoef.Feedback
 import com.github.terrakok.oefoef.FeedbackStatus
@@ -51,7 +53,18 @@ fun OpenQuestionPage(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
         topBar = {
-            TopBar(onBackClick = onBackClick)
+            val uriHandler = LocalUriHandler.current
+            TopBar(
+                onBackClick = onBackClick,
+                onFlagClick = {
+                    val body = buildString {
+                        appendLine("Lesson: ${lesson.title}")
+                        appendLine("Question: ${vm.question.text}")
+                        appendLine("<write something here>")
+                    }
+                    uriHandler.openUri("$MAILTO_LINK$body")
+                }
+            )
         },
         bottomBar = {
             BottomBar(
@@ -163,7 +176,8 @@ fun OpenQuestionPage(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TopBar(
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onFlagClick: () -> Unit
 ) {
     TopAppBar(
         title = {},
@@ -217,7 +231,7 @@ private fun TopBar(
             }
         },
         actions = {
-            IconButton(onClick = {}) {
+            IconButton(onClick = onFlagClick) {
                 Icon(
                     imageVector = Icons.Flag,
                     contentDescription = "Report issue",
