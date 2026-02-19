@@ -19,23 +19,61 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlin.time.Instant
 
+data class ApiConfiguration(
+    val baseUrl: String,
+    val apiUrl: String = "$baseUrl/api",
+    val collections: List<CollectionApi> = emptyList()
+) {
+
+    data class CollectionApi(
+        val id: String,
+        val indexRootUrl: String,
+    )
+
+    companion object {
+        val LEGACY = ApiConfiguration(
+            baseUrl = "https://eymar.nl/lang-practice",
+            collections = listOf(
+                CollectionApi(
+                    id = "nl_en",
+                    indexRootUrl = "https://eymar.nl/lang-practice/datav2"
+                )
+            )
+        )
+
+        val OEF_OEF = ApiConfiguration(
+            baseUrl = "",
+            apiUrl = "https://api.oefoef.app/",
+            collections = listOf(
+                CollectionApi(
+                    id = "nl_en",
+                    indexRootUrl = "https://collections.oefoef.app/nl_en",
+                )
+            )
+        )
+    }
+}
+
 @Inject
 @SingleIn(AppScope::class)
 class DataService(
-    private val httpClient: HttpClient
+    private val httpClient: HttpClient,
+    private val apiConfiguration: ApiConfiguration = ApiConfiguration.OEF_OEF,
+    private val activeLessonsCollectionId: String = "nl_en"
 ) {
-    private val BASE_URL = "https://eymar.nl/lang-practice"
-    private val LESSONS_COLLECTION_URL = "$BASE_URL/datav2/"
-    private val API_URL = "$BASE_URL/api/"
 
     private val dispatcher = Dispatchers.Default.limitedParallelism(1)
 
     private val headers = mutableListOf<LessonHeader>()
     private val lessons = mutableMapOf<String, Lesson>()
 
+    private val activeCollection = apiConfiguration.collections.find {
+        it.id == activeLessonsCollectionId
+    } ?: error("No active collection found with id=$activeLessonsCollectionId")
+
     suspend fun getLessons(forceRefresh: Boolean = false): List<LessonHeader> = withContext(dispatcher) {
         if (headers.isEmpty() || forceRefresh) {
-            val json = httpClient.get(LESSONS_COLLECTION_URL + "index.json").body<JsonArray>()
+            val json = httpClient.get(activeCollection.indexRootUrl + "/index.json").body<JsonArray>()
             val new = json.map {
                 val jo = it.jsonObject
                 LessonHeader(
@@ -53,7 +91,7 @@ class DataService(
 
     suspend fun getLesson(id: String): Lesson = withContext(dispatcher) {
         lessons.getOrPut(id) {
-            val jo = httpClient.get(LESSONS_COLLECTION_URL + "items/${id}.json").body<JsonObject>()
+            val jo = httpClient.get(activeCollection.indexRootUrl + "/items/${id}.json").body<JsonObject>()
             val transcription = jo.getValue("transcriptionSentences").jsonArray.map { item ->
                 val jo = item.jsonObject
                 val text = jo.getValue("text").jsonPrimitive.content
@@ -97,12 +135,12 @@ class DataService(
         answer: String
     ): CheckAnswerResponse {
         val lang = getLesson(lessonId).lang
-        val jo = httpClient.get(API_URL + "check_answer", {
+        val jo = httpClient.get(apiConfiguration.apiUrl + "/check_answer", {
             parameter("lessonId", lessonId)
             parameter("lang", lang)
             parameter("questionId", questionId)
             parameter("answer", answer)
-            timeout { requestTimeoutMillis = 60_000  }
+            timeout { requestTimeoutMillis = 60_000 }
         }).body<JsonObject>()
 
         if (jo.containsKey("error") && jo["error"] != null) {
