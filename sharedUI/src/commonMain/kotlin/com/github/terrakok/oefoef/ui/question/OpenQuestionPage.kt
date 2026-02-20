@@ -302,7 +302,7 @@ private fun FeedbackCard(
 
             val alpha by transition.animateFloat(
                 initialValue = 0.2f,
-                targetValue = 1f,
+                targetValue = 0.8f,
                 animationSpec = infiniteRepeatable(
                     animation = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
                     repeatMode = RepeatMode.Reverse
