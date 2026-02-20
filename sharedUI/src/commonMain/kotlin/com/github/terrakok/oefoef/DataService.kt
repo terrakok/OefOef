@@ -139,7 +139,10 @@ class DataService(
             parameter("lang", lang)
             parameter("questionId", questionId)
             parameter("answer", answer)
-            timeout { requestTimeoutMillis = 60_000 }
+            timeout {
+                socketTimeoutMillis = 60_000
+                requestTimeoutMillis = 60_000
+            }
         }).body<JsonObject>()
 
         if (jo.containsKey("error") && jo["error"] != null) {

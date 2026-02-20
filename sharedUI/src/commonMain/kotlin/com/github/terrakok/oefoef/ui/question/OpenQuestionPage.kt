@@ -1,5 +1,11 @@
 package com.github.terrakok.oefoef.ui.question
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -13,6 +19,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
@@ -20,6 +27,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.terrakok.oefoef.MAILTO_LINK
@@ -100,7 +108,7 @@ fun OpenQuestionPage(
             Spacer(modifier = Modifier.height(48.dp))
 
             Text(
-                text = "Your Answer",
+                text = "Your answer:",
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -166,8 +174,7 @@ fun OpenQuestionPage(
                 }
             )
 
-            Spacer(modifier = Modifier.height(48.dp))
-
+            Spacer(modifier = Modifier.height(16.dp))
             FeedbackCard(feedback.answer, feedback) { vm.checkAnswer() }
         }
     }
@@ -250,7 +257,31 @@ private fun FeedbackCard(
 ) {
     Column {
         val result = feedback.result
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            OutlinedButton(
+                onClick = onCheckClick,
+                enabled = feedback.status == FeedbackStatus.OUTDATED || feedback.status == FeedbackStatus.DRAFT,
+                modifier = Modifier.widthIn(min = 200.dp),
+                shape = RoundedCornerShape(50),
+            ) {
+                if (feedback.status == FeedbackStatus.LOADING) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                    )
+                } else {
+                    Text(
+                        text = "CHECK MY ANSWER",
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
+            }
+        }
         if (result != null) {
+            Spacer(modifier = Modifier.height(24.dp))
+
             val color = if (result.isCorrect) {
                 MaterialTheme.colorScheme.primary
             } else {
@@ -266,9 +297,28 @@ private fun FeedbackCard(
             } else {
                 Icons.Close
             }
+
+            val transition = rememberInfiniteTransition(label = "alpha")
+
+            val alpha by transition.animateFloat(
+                initialValue = 0.2f,
+                targetValue = 0.8f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+                    repeatMode = RepeatMode.Reverse
+                ),
+                label = "alphaValue"
+            )
+
+            val actualAlpha = when (feedback.status) {
+                FeedbackStatus.LOADING -> alpha
+                FeedbackStatus.OUTDATED -> 0.5f
+                else -> 1f
+            }
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .alpha(actualAlpha)
                     .clip(RoundedCornerShape(24.dp))
                     .background(color.copy(alpha = 0.8f))
                     .padding(start = 4.dp)
@@ -309,29 +359,22 @@ private fun FeedbackCard(
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(32.dp))
         }
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
-            OutlinedButton(
-                onClick = onCheckClick,
-                enabled = feedback.status == FeedbackStatus.OUTDATED || feedback.status == FeedbackStatus.DRAFT,
-                modifier = Modifier.widthIn(min = 200.dp),
-                shape = RoundedCornerShape(50),
-            ) {
-                if (feedback.status == FeedbackStatus.LOADING) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                    )
-                } else {
-                    Text(
-                        text = if (feedback.status == FeedbackStatus.DRAFT) "CHECK ANSWER" else "TRY AGAIN",
-                        style = MaterialTheme.typography.labelLarge,
-                    )
-                }
+
+        if (feedback.status == FeedbackStatus.ACTUAL) {
+            Column {
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    text = "You can edit your answer to make another attempt.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(modifier = Modifier.height(24.dp))
             }
+        } else {
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

@@ -56,7 +56,8 @@ data class Feedback(
     val answer: String,
     val result: FeedbackResult?,
     val status: FeedbackStatus,
-    val spellcheck: SpellcheckResult = SpellcheckResult.EMPTY
+    val spellcheck: SpellcheckResult = SpellcheckResult.EMPTY,
+    val lastCheckedAnswer: String? = null,
 )
 
 @Serializable

@@ -118,7 +118,12 @@ class FeedbackService(
         answer: String
     ) {
         val prev = getFeedback(lessonId, questionId)
-        val newStatus = if (prev.status == FeedbackStatus.DRAFT) FeedbackStatus.DRAFT else FeedbackStatus.OUTDATED
+
+        val newStatus = when  {
+            prev.lastCheckedAnswer == null -> FeedbackStatus.DRAFT
+            prev.lastCheckedAnswer.trim() == answer.trim() -> FeedbackStatus.ACTUAL
+            else -> FeedbackStatus.OUTDATED
+        }
         saveFeedback(lessonId, questionId, prev.copy(answer = answer, status = newStatus))
 
         if (clientSpellcheck.enabled) {
@@ -139,7 +144,13 @@ class FeedbackService(
         try {
             saveFeedback(lessonId, questionId, prev.copy(status = FeedbackStatus.LOADING))
             val feedbackResponse = dataService.checkAnswer(lessonId, questionId, prev.answer)
-            val feedback = Feedback(prev.answer, processFeedback(feedbackResponse), FeedbackStatus.ACTUAL)
+            val feedback = Feedback(
+                answer = prev.answer,
+                result = processFeedback(feedbackResponse),
+                status = FeedbackStatus.ACTUAL,
+                spellcheck = SpellcheckResult.EMPTY, // the local spellchecker is not perfect, prefer the feedbackResponse
+                lastCheckedAnswer = prev.answer
+            )
             saveFeedback(lessonId, questionId, feedback)
         } catch (e: Throwable) {
             saveFeedback(
