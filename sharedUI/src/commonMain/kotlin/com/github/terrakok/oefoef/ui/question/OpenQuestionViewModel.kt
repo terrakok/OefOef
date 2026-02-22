@@ -9,6 +9,7 @@ import com.github.terrakok.oefoef.DataService
 import com.github.terrakok.oefoef.Feedback
 import com.github.terrakok.oefoef.FeedbackService
 import com.github.terrakok.oefoef.Lesson
+import com.github.terrakok.oefoef.LessonStatsService
 import com.github.terrakok.oefoef.OpenQuestion
 import dev.zacsweers.metro.*
 import dev.zacsweers.metrox.viewmodel.ManualViewModelAssistedFactory
@@ -20,7 +21,8 @@ import kotlinx.coroutines.launch
 class OpenQuestionViewModel(
     @Assisted val id: String,
     val dataService: DataService,
-    val feedbackService: FeedbackService
+    val feedbackService: FeedbackService,
+    val lessonStatsService: LessonStatsService,
 ) : ViewModel() {
     @AssistedFactory
     @ManualViewModelAssistedFactoryKey(Factory::class)
@@ -53,6 +55,7 @@ class OpenQuestionViewModel(
                 loading = true
                 error = null
                 lesson = dataService.getLesson(id)
+                currentQuestionIndex = lessonStatsService.getLastOpenQuestionIndex(id)
             } catch (e: Throwable) {
                 error = e.message
             } finally {
@@ -75,11 +78,17 @@ class OpenQuestionViewModel(
         currentQuestionIndex++
         val max = lesson?.questions?.size ?: 0
         currentQuestionIndex.coerceIn(0..<max)
+        lesson?.let {
+            lessonStatsService.setLastOpenQuestionIndex(it.id, currentQuestionIndex)
+        }
     }
 
     fun previousQuestion() {
         currentQuestionIndex--
         val max = lesson?.questions?.size ?: 0
         currentQuestionIndex.coerceIn(0..<max)
+        lesson?.let {
+            lessonStatsService.setLastOpenQuestionIndex(it.id, currentQuestionIndex)
+        }
     }
 }
