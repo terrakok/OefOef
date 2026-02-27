@@ -3,11 +3,7 @@ package com.github.terrakok.oefoef.ui.welcome
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
@@ -21,16 +17,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.github.terrakok.oefoef.LessonHeader
+import com.github.terrakok.oefoef.MAILTO_LINK
+import com.github.terrakok.oefoef.ui.AppTheme
 import com.github.terrakok.oefoef.ui.Icons
 import com.github.terrakok.oefoef.ui.LoadingWidget
 import dev.zacsweers.metrox.viewmodel.metroViewModel
-
-import androidx.compose.ui.tooling.preview.Preview
-import com.github.terrakok.oefoef.MAILTO_LINK
-import com.github.terrakok.oefoef.ui.AppTheme
 import kotlin.time.Clock
 
 @Preview
@@ -72,6 +67,7 @@ fun WelcomePage(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WelcomePageContent(
     items: List<LessonHeader>,
@@ -87,7 +83,7 @@ fun WelcomePageContent(
             Surface(
                 shadowElevation = if (state.canScrollBackward) 8.dp else 0.dp,
             ) {
-                WelcomeTopBar()
+                WelcomeTopBar(onLanguagePickClick = { /* TODO */ })
             }
         },
         containerColor = MaterialTheme.colorScheme.surface
@@ -203,7 +199,9 @@ private fun Header() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun WelcomeTopBar() {
+private fun WelcomeTopBar(
+    onLanguagePickClick: () -> Unit,
+) {
     TopAppBar(
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -230,6 +228,15 @@ private fun WelcomeTopBar() {
             }
         },
         actions = {
+            IconButton(
+                onClick = { onLanguagePickClick() }
+            ) {
+                Icon(
+                    imageVector = Icons.Languages,
+                    contentDescription = "Lessons collection picker",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
             val uriHandler = LocalUriHandler.current
             IconButton(
                 onClick = {

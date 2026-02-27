@@ -1,5 +1,6 @@
 package com.github.terrakok.oefoef
 
+import com.russhwolf.settings.Settings
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
@@ -21,35 +22,41 @@ import kotlin.time.Instant
 
 data class ApiConfiguration(
     val apiUrl: String,
-    val collections: List<CollectionApi> = emptyList(),
+    val collections: List<LessonsCollectionMeta> = emptyList(),
     val activeLessonsCollectionId: String = "nl_en"
 ) {
 
-    data class CollectionApi(
+    data class LessonsCollectionMeta(
         val id: String,
         val indexRootUrl: String,
+        val langName: String,
+        val langCode: String,
     )
 
     companion object {
-        val LEGACY = ApiConfiguration(
-            apiUrl = "https://eymar.nl/lang-practice/api",
-            collections = listOf(
-                CollectionApi(
-                    id = "nl_en",
-                    indexRootUrl = "https://eymar.nl/lang-practice/datav2"
-                )
-            )
-        )
-
         val OEF_OEF = ApiConfiguration(
             apiUrl = "https://api.oefoef.app/",
             collections = listOf(
-                CollectionApi(
+                LessonsCollectionMeta(
                     id = "nl_en",
                     indexRootUrl = "https://collections.oefoef.app/nl_en",
-                )
+                    langName = "Dutch",
+                    langCode = "NL",
+                ),
+                LessonsCollectionMeta(
+                    id = "en_en",
+                    indexRootUrl = "https://collections.oefoef.app/en_en",
+                    langName = "English",
+                    langCode = "EN",
+                ),
+                LessonsCollectionMeta(
+                    id = "de_en",
+                    indexRootUrl = "https://collections.oefoef.app/de_en",
+                    langName = "German",
+                    langCode = "DE",
+                ),
             ),
-            activeLessonsCollectionId = "nl_en"
+            activeLessonsCollectionId = "de_en"
         )
     }
 }
@@ -58,20 +65,24 @@ data class ApiConfiguration(
 @SingleIn(AppScope::class)
 class DataService(
     private val httpClient: HttpClient,
-    private val apiConfiguration: ApiConfiguration = ApiConfiguration.OEF_OEF,
+    private val settings: Settings,
 ) {
 
     private val dispatcher = Dispatchers.Default.limitedParallelism(1)
 
     private val headers = mutableListOf<LessonHeader>()
     private val lessons = mutableMapOf<String, Lesson>()
+    private val apiConfiguration = ApiConfiguration.OEF_OEF
 
-    private val activeCollection = apiConfiguration.collections.find {
-        it.id == apiConfiguration.activeLessonsCollectionId
-    } ?: error("No active collection found with id=${apiConfiguration.activeLessonsCollectionId}")
+    private fun getActiveCollection(): ApiConfiguration.LessonsCollectionMeta {
+        val id = settings.getStringOrNull(ACTIVE_LESSONS_COLLECTION_ID) ?: "nl_en"
+        return apiConfiguration.collections.find { it.id == id }
+            ?: error("No active collection found with id=${apiConfiguration.activeLessonsCollectionId}")
+    }
 
     suspend fun getLessons(forceRefresh: Boolean = false): List<LessonHeader> = withContext(dispatcher) {
         if (headers.isEmpty() || forceRefresh) {
+            val activeCollection = getActiveCollection()
             val json = httpClient.get(activeCollection.indexRootUrl + "/index.json").body<JsonArray>()
             val new = json.map {
                 val jo = it.jsonObject
@@ -90,6 +101,7 @@ class DataService(
 
     suspend fun getLesson(id: String): Lesson = withContext(dispatcher) {
         lessons.getOrPut(id) {
+            val activeCollection = getActiveCollection()
             val jo = httpClient.get(activeCollection.indexRootUrl + "/items/${id}.json").body<JsonObject>()
             val transcription = jo.getValue("transcriptionSentences").jsonArray.map { item ->
                 val jo = item.jsonObject
@@ -156,4 +168,8 @@ class DataService(
         val result: String? = null,
         val error: String? = null
     )
+
+    companion object {
+        private const val ACTIVE_LESSONS_COLLECTION_ID = "com.github.terrakok.oefoef.active_collection_id_key"
+    }
 }
