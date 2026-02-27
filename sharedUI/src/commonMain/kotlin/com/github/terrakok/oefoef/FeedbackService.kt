@@ -126,7 +126,7 @@ class FeedbackService(
         }
         saveFeedback(lessonId, questionId, prev.copy(answer = answer, status = newStatus))
 
-        if (clientSpellcheck.enabled) {
+        if (clientSpellcheck.enabled && lessonId.contains("nl_en")) { // TODO: support spell check for other languages
             spellCheckRequestFlow.tryEmit(SpellCheckRequest(lessonId, questionId, answer))
         }
     }

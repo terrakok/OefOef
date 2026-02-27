@@ -139,7 +139,11 @@ class DataService(
                 OpenQuestion(
                     id = q.getValue("id").jsonPrimitive.content,
                     text = q.getValue("question").jsonPrimitive.content,
-                    textEn = q.getValue("question_en").jsonPrimitive.content
+                    textEn = if (q.containsKey("question_en")) {
+                        q.getValue("question_en").jsonPrimitive.content
+                    } else {
+                        ""
+                    }
                 )
             }
             Lesson(

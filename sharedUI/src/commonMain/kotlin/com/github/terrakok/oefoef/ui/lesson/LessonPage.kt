@@ -323,9 +323,10 @@ private fun TextSegmentItem(
             )
             Spacer(modifier = Modifier.width(12.dp))
             Text(
-                text =
-                    if (!onHoldItem) transcriptionItem.text
-                    else transcriptionItem.translationEn,
+                text = when {
+                    !onHoldItem -> transcriptionItem.text
+                    else -> transcriptionItem.translationEn.ifBlank { transcriptionItem.text }
+                },
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = fontWeight,
                     color = MaterialTheme.colorScheme.onSurface
