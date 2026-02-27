@@ -4,22 +4,29 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.github.terrakok.oefoef.DataService
 import com.github.terrakok.oefoef.LessonHeader
 import com.github.terrakok.oefoef.MAILTO_LINK
 import com.github.terrakok.oefoef.ui.AppTheme
@@ -59,12 +66,27 @@ fun WelcomePage(
         return
     }
 
+    var showLanguageDialog by remember { mutableStateOf(false) }
+
     WelcomePageContent(
         items = vm.items,
         onLessonHeaderClick = onLessonHeaderClick,
         onPullToRefresh = { vm.refresh() },
         isRefreshing = vm.isRefreshing,
+        onLanguagePickClick = { showLanguageDialog = true },
+        languageToMaster = vm.languageName
     )
+
+    if (showLanguageDialog) {
+        LanguagePickerDialog(
+            languageSettings = vm.languageSettings,
+            onLanguageSelected = {
+                showLanguageDialog = false
+                vm.onLanguageSelected(it)
+            },
+            onDismissRequest = { showLanguageDialog = false }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,7 +95,9 @@ fun WelcomePageContent(
     items: List<LessonHeader>,
     onLessonHeaderClick: (LessonHeader) -> Unit = {},
     isRefreshing: Boolean = false,
-    onPullToRefresh: () -> Unit = {}
+    onPullToRefresh: () -> Unit = {},
+    onLanguagePickClick: () -> Unit = {},
+    languageToMaster: String = "Dutch",
 ) {
     val state = rememberLazyGridState()
     val ptrState = rememberPullToRefreshState()
@@ -83,7 +107,7 @@ fun WelcomePageContent(
             Surface(
                 shadowElevation = if (state.canScrollBackward) 8.dp else 0.dp,
             ) {
-                WelcomeTopBar(onLanguagePickClick = { /* TODO */ })
+                WelcomeTopBar(onLanguagePickClick = onLanguagePickClick)
             }
         },
         containerColor = MaterialTheme.colorScheme.surface
@@ -110,7 +134,7 @@ fun WelcomePageContent(
             ) {
                 item(
                     span = { GridItemSpan(maxCurrentLineSpan) }
-                ) { Header() }
+                ) { Header(languageToMaster) }
                 items(items) { lesson ->
                     LessonCard(
                         lesson = lesson,
@@ -123,13 +147,13 @@ fun WelcomePageContent(
 }
 
 @Composable
-private fun Header() {
+private fun Header(languageToMaster: String) {
     Column(
         modifier = Modifier.width(IntrinsicSize.Min),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Master Dutch through",
+            text = "Master $languageToMaster through",
             style = MaterialTheme.typography.displayMedium.copy(
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
@@ -249,6 +273,59 @@ private fun WelcomeTopBar(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+        }
+    )
+}
+
+@Composable
+private fun LanguagePickerDialog(
+    languageSettings: DataService.LanguageSettings,
+    onLanguageSelected: (String) -> Unit, // language code
+    onDismissRequest: () -> Unit,
+) {
+    var current by remember { mutableStateOf(languageSettings.currentLanguageCode) }
+
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text("Choose language") },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                languageSettings.availableLanguages.forEach { codeToName ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(10.dp))
+                            .selectable(
+                                selected = codeToName.first == current,
+                                onClick = { current = codeToName.first },
+                                role = Role.RadioButton
+                            )
+                            .padding(horizontal = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = codeToName.first == current,
+                            onClick = { current = codeToName.first },
+                        )
+                        Text(
+                            text = codeToName.second,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onLanguageSelected(current) }
+            ) { Text("Done") }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismissRequest
+            ) { Text("Cancel") }
         }
     )
 }

@@ -1,5 +1,6 @@
 package com.github.terrakok.oefoef.ui.welcome
 
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -31,6 +32,13 @@ class WelcomeViewModel(
         private set
     var error by mutableStateOf<String?>(null)
         private set
+    var languageSettings by mutableStateOf(dataService.getLanguageSettings())
+        private set
+    val languageName by derivedStateOf {
+        languageSettings.availableLanguages.firstOrNull {
+            it.first == languageSettings.currentLanguageCode
+        }?.second ?: "???"
+    }
 
     init {
         loadItems()
@@ -42,7 +50,7 @@ class WelcomeViewModel(
                 loading = true
                 error = null
                 items.clear()
-                items.addAll(dataService.getLessons())
+                items.addAll(dataService.getLessons(forceRefresh = true))
             } catch (e: Throwable) {
                 error = e.message
             } finally {
@@ -70,5 +78,10 @@ class WelcomeViewModel(
                 isRefreshing = false
             }
         }
+    }
+
+    fun onLanguageSelected(languageCode: String) {
+        languageSettings = dataService.updateCurrentLanguage(languageCode)
+        loadItems()
     }
 }

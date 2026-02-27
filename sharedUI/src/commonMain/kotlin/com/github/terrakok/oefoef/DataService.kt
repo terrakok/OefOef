@@ -23,7 +23,6 @@ import kotlin.time.Instant
 data class ApiConfiguration(
     val apiUrl: String,
     val collections: List<LessonsCollectionMeta> = emptyList(),
-    val activeLessonsCollectionId: String = "nl_en"
 ) {
 
     data class LessonsCollectionMeta(
@@ -56,7 +55,6 @@ data class ApiConfiguration(
                     langCode = "DE",
                 ),
             ),
-            activeLessonsCollectionId = "de_en"
         )
     }
 }
@@ -77,7 +75,24 @@ class DataService(
     private fun getActiveCollection(): ApiConfiguration.LessonsCollectionMeta {
         val id = settings.getStringOrNull(ACTIVE_LESSONS_COLLECTION_ID) ?: "nl_en"
         return apiConfiguration.collections.find { it.id == id }
-            ?: error("No active collection found with id=${apiConfiguration.activeLessonsCollectionId}")
+            ?: error("No collection found with id=$id")
+    }
+
+    fun getLanguageSettings(): LanguageSettings {
+        return LanguageSettings(
+            availableLanguages = apiConfiguration.collections.map { it.langCode to it.langName },
+            currentLanguageCode = getActiveCollection().langCode,
+        )
+    }
+
+    fun updateCurrentLanguage(languageCode: String): LanguageSettings {
+        val collectionId = apiConfiguration.collections.firstOrNull {
+            it.langCode == languageCode
+        }?.id
+        if (collectionId != null) {
+            settings.putString(ACTIVE_LESSONS_COLLECTION_ID, collectionId)
+        }
+        return getLanguageSettings()
     }
 
     suspend fun getLessons(forceRefresh: Boolean = false): List<LessonHeader> = withContext(dispatcher) {
@@ -94,6 +109,7 @@ class DataService(
                     createdAt = Instant.parse(jo.getValue("createdAt").jsonPrimitive.content.replace(" ", "T"))
                 )
             }.sortedByDescending { it.createdAt }
+            headers.clear()
             headers.addAll(new)
         }
         headers
@@ -167,6 +183,11 @@ class DataService(
     data class CheckAnswerResponse(
         val result: String? = null,
         val error: String? = null
+    )
+
+    data class LanguageSettings(
+        val availableLanguages: List<Pair<String, String>>, // code to name
+        val currentLanguageCode: String,
     )
 
     companion object {
