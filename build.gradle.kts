@@ -7,6 +7,5 @@ plugins {
     alias(libs.plugins.android.kmp.library).apply(false)
     alias(libs.plugins.kotlin.jvm).apply(false)
     alias(libs.plugins.kotlinx.serialization).apply(false)
-    alias(libs.plugins.kotlinx.atomicfu).apply(false)
     alias(libs.plugins.metro).apply(false)
 }

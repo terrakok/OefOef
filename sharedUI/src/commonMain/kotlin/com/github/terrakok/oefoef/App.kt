@@ -55,7 +55,7 @@ fun App(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.surfaceContainerLowest),
-            sceneStrategy = rememberSplitSceneStrategy(),
+            sceneStrategies = listOf(rememberSplitSceneStrategy()),
             transitionSpec = { ContentTransform(EnterTransition.None, ExitTransition.None) },
             popTransitionSpec = { ContentTransform(EnterTransition.None, ExitTransition.None) },
             entryDecorators = listOf(

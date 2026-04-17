@@ -7,11 +7,14 @@ plugins {
     alias(libs.plugins.android.kmp.library)
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.metro)
-    alias(libs.plugins.kotlinx.atomicfu)
 }
 
 kotlin {
-    androidTarget() //We need the deprecated target to have working previews
+    android {
+        namespace = "com.github.terrakok.oefoef"
+        compileSdk = 36
+        minSdk = 23
+    }
 
     jvm()
 
@@ -44,6 +47,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel.nav3)
             implementation(libs.compose.nav3)
             implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kotlinx.atomicfu)
             implementation(libs.coil)
             implementation(libs.coil.network.ktor)
             implementation(libs.multiplatformSettings)
@@ -93,19 +97,4 @@ kotlin {
                 }
             }
         }
-}
-
-dependencies {
-    debugImplementation(libs.compose.ui.tooling)
-}
-android {
-    namespace = "com.github.terrakok.oefoef"
-    compileSdk = 36
-    defaultConfig {
-        minSdk = 23
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
 }
