@@ -7,9 +7,12 @@ import dev.zacsweers.metro.SingleIn
 
 interface ClientSpellcheck {
     val enabled: Boolean
+
     suspend fun correct(word: String): Boolean
+
     suspend fun suggest(word: String): List<String>
 }
+
 internal class DisabledClientSpellCheck : ClientSpellcheck {
     override val enabled: Boolean
         get() = false

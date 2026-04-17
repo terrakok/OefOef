@@ -23,7 +23,7 @@ import kotlin.reflect.KClass
 
 @SingleIn(AppScope::class)
 @DependencyGraph(AppScope::class)
-internal interface AppGraph: ViewModelGraph {
+internal interface AppGraph : ViewModelGraph {
     @SingleIn(AppScope::class)
     @Provides
     fun provideJson(): Json = Json {
@@ -39,8 +39,7 @@ internal interface AppGraph: ViewModelGraph {
 
     @SingleIn(AppScope::class)
     @Provides
-    fun provideAppCoroutineScope(): CoroutineScope =
-        CoroutineScope(Dispatchers.Default + SupervisorJob())
+    fun provideAppCoroutineScope(): CoroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     @SingleIn(AppScope::class)
     @Provides
@@ -49,7 +48,8 @@ internal interface AppGraph: ViewModelGraph {
         install(Logging) {
             logger = object : Logger {
                 override fun log(message: String) {
-                    co.touchlab.kermit.Logger.d("httpClient") { message }
+                    co.touchlab.kermit.Logger
+                        .d("httpClient") { message }
                 }
             }
             level = if (DEBUG) LogLevel.INFO else LogLevel.NONE
@@ -62,7 +62,9 @@ internal interface AppGraph: ViewModelGraph {
 
     @DependencyGraph.Factory
     interface Factory {
-        fun create(@Provides spellChecker: ClientSpellcheck): AppGraph
+        fun create(
+            @Provides spellChecker: ClientSpellcheck,
+        ): AppGraph
     }
 }
 
@@ -75,7 +77,7 @@ internal fun WithAppGraph(
         createGraphFactory<AppGraph.Factory>().create(clientSpellcheck)
     }
     CompositionLocalProvider(
-        LocalMetroViewModelFactory provides graph.metroViewModelFactory
+        LocalMetroViewModelFactory provides graph.metroViewModelFactory,
     ) {
         content()
     }

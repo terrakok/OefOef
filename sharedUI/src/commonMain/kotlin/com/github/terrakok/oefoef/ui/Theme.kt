@@ -22,12 +22,12 @@ internal val LocalThemeIsDark = compositionLocalOf { mutableStateOf(true) }
 @Composable
 internal fun AppTheme(
     onThemeChanged: @Composable (isDark: Boolean) -> Unit = {},
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val systemIsDark = isSystemInDarkTheme()
     val isDarkState = remember(systemIsDark) { mutableStateOf(systemIsDark) }
     CompositionLocalProvider(
-        LocalThemeIsDark provides isDarkState
+        LocalThemeIsDark provides isDarkState,
     ) {
         val isDark by isDarkState
         onThemeChanged(!isDark)
@@ -46,7 +46,7 @@ internal fun AppTheme(
         DynamicMaterialTheme(
             state = dynamicThemeState,
             animate = true,
-            content =  { Surface(content = content) },
+            content = { Surface(content = content) },
         )
     }
 }

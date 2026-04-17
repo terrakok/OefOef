@@ -11,11 +11,11 @@ internal actual fun BrowserNavigation(backStack: SnapshotStateList<AppNavKey>) {
     HierarchicalBrowserNavigation(
         currentDestination = remember { derivedStateOf { backStack.lastOrNull() } },
         currentDestinationName = {
-            when (val key =  it as AppNavKey) {
+            when (val key = it as AppNavKey) {
                 is WelcomeScreen -> ""
                 is LessonScreen -> "#/lesson/${key.id}"
                 is OpenQuestionScreen -> "#/lesson/${key.id}"
             }
-        }
+        },
     )
 }

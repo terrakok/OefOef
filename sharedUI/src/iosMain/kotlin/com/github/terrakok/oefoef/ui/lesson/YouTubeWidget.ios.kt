@@ -12,11 +12,11 @@ import androidx.compose.ui.text.style.TextAlign
 actual fun YouTubeWidget(
     videoId: String,
     controller: YouTubeController,
-    modifier: Modifier
+    modifier: Modifier,
 ) {
     Box(
         modifier = modifier,
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Text(
             text = "YouTube video: $videoId",

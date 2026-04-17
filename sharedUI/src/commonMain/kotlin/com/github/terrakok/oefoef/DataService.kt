@@ -22,9 +22,8 @@ import kotlin.time.Instant
 data class ApiConfiguration(
     val apiUrl: String,
     val collections: List<CollectionApi> = emptyList(),
-    val activeLessonsCollectionId: String = "nl_en"
+    val activeLessonsCollectionId: String = "nl_en",
 ) {
-
     data class CollectionApi(
         val id: String,
         val indexRootUrl: String,
@@ -36,9 +35,9 @@ data class ApiConfiguration(
             collections = listOf(
                 CollectionApi(
                     id = "nl_en",
-                    indexRootUrl = "https://eymar.nl/lang-practice/datav2"
-                )
-            )
+                    indexRootUrl = "https://eymar.nl/lang-practice/datav2",
+                ),
+            ),
         )
 
         val OEF_OEF = ApiConfiguration(
@@ -47,9 +46,9 @@ data class ApiConfiguration(
                 CollectionApi(
                     id = "nl_en",
                     indexRootUrl = "https://collections.oefoef.app/nl_en",
-                )
+                ),
             ),
-            activeLessonsCollectionId = "nl_en"
+            activeLessonsCollectionId = "nl_en",
         )
     }
 }
@@ -60,7 +59,6 @@ class DataService(
     private val httpClient: HttpClient,
     private val apiConfiguration: ApiConfiguration = ApiConfiguration.OEF_OEF,
 ) {
-
     private val dispatcher = Dispatchers.Default.limitedParallelism(1)
 
     private val headers = mutableListOf<LessonHeader>()
@@ -73,16 +71,22 @@ class DataService(
     suspend fun getLessons(forceRefresh: Boolean = false): List<LessonHeader> = withContext(dispatcher) {
         if (headers.isEmpty() || forceRefresh) {
             val json = httpClient.get(activeCollection.indexRootUrl + "/index.json").body<JsonArray>()
-            val new = json.map {
-                val jo = it.jsonObject
-                LessonHeader(
-                    id = jo.getValue("id").jsonPrimitive.content,
-                    title = jo.getValue("title").jsonPrimitive.content,
-                    previewUrl = jo.getValue("pictureUrl").jsonPrimitive.content,
-                    lengthSeconds = jo["videoDuration"]?.jsonPrimitive?.int ?: 0,
-                    createdAt = Instant.parse(jo.getValue("createdAt").jsonPrimitive.content.replace(" ", "T"))
-                )
-            }.sortedByDescending { it.createdAt }
+            val new = json
+                .map {
+                    val jo = it.jsonObject
+                    LessonHeader(
+                        id = jo.getValue("id").jsonPrimitive.content,
+                        title = jo.getValue("title").jsonPrimitive.content,
+                        previewUrl = jo.getValue("pictureUrl").jsonPrimitive.content,
+                        lengthSeconds = jo["videoDuration"]?.jsonPrimitive?.int ?: 0,
+                        createdAt = Instant.parse(
+                            jo
+                                .getValue("createdAt")
+                                .jsonPrimitive.content
+                                .replace(" ", "T"),
+                        ),
+                    )
+                }.sortedByDescending { it.createdAt }
             headers.addAll(new)
         }
         headers
@@ -90,7 +94,7 @@ class DataService(
 
     suspend fun getLesson(id: String): Lesson = withContext(dispatcher) {
         lessons.getOrPut(id) {
-            val jo = httpClient.get(activeCollection.indexRootUrl + "/items/${id}.json").body<JsonObject>()
+            val jo = httpClient.get(activeCollection.indexRootUrl + "/items/$id.json").body<JsonObject>()
             val transcription = jo.getValue("transcriptionSentences").jsonArray.map { item ->
                 val jo = item.jsonObject
                 val text = jo.getValue("text").jsonPrimitive.content
@@ -100,9 +104,12 @@ class DataService(
                     text
                 }
                 TranscriptionItem(
-                    time = jo.getValue("start").jsonPrimitive.float.toInt(),
+                    time = jo
+                        .getValue("start")
+                        .jsonPrimitive.float
+                        .toInt(),
                     text = text,
-                    translationEn = translation
+                    translationEn = translation,
                 )
             }
             val practice = jo.getValue("practice").jsonObject
@@ -111,7 +118,7 @@ class DataService(
                 OpenQuestion(
                     id = q.getValue("id").jsonPrimitive.content,
                     text = q.getValue("question").jsonPrimitive.content,
-                    textEn = q.getValue("question_en").jsonPrimitive.content
+                    textEn = q.getValue("question_en").jsonPrimitive.content,
                 )
             }
             Lesson(
@@ -122,8 +129,13 @@ class DataService(
                 lengthSeconds = jo.getValue("videoDuration").jsonPrimitive.int,
                 videoTranscription = transcription,
                 questions = questions,
-                createdAt = Instant.parse(jo.getValue("createdAt").jsonPrimitive.content.replace(" ", "T")),
-                lang = jo.getValue("language").jsonPrimitive.content
+                createdAt = Instant.parse(
+                    jo
+                        .getValue("createdAt")
+                        .jsonPrimitive.content
+                        .replace(" ", "T"),
+                ),
+                lang = jo.getValue("language").jsonPrimitive.content,
             )
         }
     }
@@ -131,19 +143,21 @@ class DataService(
     suspend fun checkAnswer(
         lessonId: String,
         questionId: String,
-        answer: String
+        answer: String,
     ): CheckAnswerResponse {
         val lang = getLesson(lessonId).lang
-        val jo = httpClient.get(apiConfiguration.apiUrl + "/check_answer", {
-            parameter("lessonId", lessonId)
-            parameter("lang", lang)
-            parameter("questionId", questionId)
-            parameter("answer", answer)
-            timeout {
-                socketTimeoutMillis = 60_000
-                requestTimeoutMillis = 60_000
-            }
-        }).body<JsonObject>()
+        val jo = httpClient
+            .get(apiConfiguration.apiUrl + "/check_answer", {
+                parameter("lessonId", lessonId)
+                parameter("lang", lang)
+                parameter("questionId", questionId)
+                parameter("answer", answer)
+                timeout {
+                    socketTimeoutMillis = 60_000
+                    requestTimeoutMillis = 60_000
+                }
+            })
+            .body<JsonObject>()
 
         if (jo.containsKey("error") && jo["error"] != null) {
             return CheckAnswerResponse(error = jo.getValue("error").jsonPrimitive.content)
@@ -154,6 +168,6 @@ class DataService(
 
     data class CheckAnswerResponse(
         val result: String? = null,
-        val error: String? = null
+        val error: String? = null,
     )
 }

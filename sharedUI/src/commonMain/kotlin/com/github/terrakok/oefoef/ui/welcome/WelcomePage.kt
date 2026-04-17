@@ -21,16 +21,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.github.terrakok.oefoef.LessonHeader
+import com.github.terrakok.oefoef.MAILTO_LINK
+import com.github.terrakok.oefoef.ui.AppTheme
 import com.github.terrakok.oefoef.ui.Icons
 import com.github.terrakok.oefoef.ui.LoadingWidget
 import dev.zacsweers.metrox.viewmodel.metroViewModel
-
-import androidx.compose.ui.tooling.preview.Preview
-import com.github.terrakok.oefoef.MAILTO_LINK
-import com.github.terrakok.oefoef.ui.AppTheme
 import kotlin.time.Clock
 
 @Preview
@@ -43,23 +42,20 @@ private fun WelcomePagePreview() {
                 LessonHeader("2", "Koffie Bestellen", "", 200, Clock.System.now()),
                 LessonHeader("3", "De Weg Vragen", "", 310, Clock.System.now()),
                 LessonHeader("4", "Boodschappen Doen", "", 405, Clock.System.now()),
-            )
+            ),
         )
     }
 }
 
-
 @Composable
-fun WelcomePage(
-    onLessonHeaderClick: (LessonHeader) -> Unit = {}
-) {
+fun WelcomePage(onLessonHeaderClick: (LessonHeader) -> Unit = {}) {
     val vm = metroViewModel<WelcomeViewModel>()
     if (vm.loading || vm.error != null) {
         LoadingWidget(
             modifier = Modifier.fillMaxSize(),
             error = vm.error,
             loading = vm.loading,
-            onReload = { vm.loadItems() }
+            onReload = { vm.loadItems() },
         )
         return
     }
@@ -77,7 +73,7 @@ fun WelcomePageContent(
     items: List<LessonHeader>,
     onLessonHeaderClick: (LessonHeader) -> Unit = {},
     isRefreshing: Boolean = false,
-    onPullToRefresh: () -> Unit = {}
+    onPullToRefresh: () -> Unit = {},
 ) {
     val state = rememberLazyGridState()
     val ptrState = rememberPullToRefreshState()
@@ -90,7 +86,7 @@ fun WelcomePageContent(
                 WelcomeTopBar()
             }
         },
-        containerColor = MaterialTheme.colorScheme.surface
+        containerColor = MaterialTheme.colorScheme.surface,
     ) { paddingValues ->
         PullToRefreshBoxTouchOnly(
             isRefreshing = isRefreshing,
@@ -102,7 +98,7 @@ fun WelcomePageContent(
                     isRefreshing = isRefreshing,
                     state = ptrState,
                 )
-            }
+            },
         ) {
             LazyVerticalGrid(
                 state = state,
@@ -110,15 +106,15 @@ fun WelcomePageContent(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = paddingValues.plus(PaddingValues(horizontal = 16.dp, vertical = 48.dp)),
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
-                verticalArrangement = Arrangement.spacedBy(28.dp)
+                verticalArrangement = Arrangement.spacedBy(28.dp),
             ) {
                 item(
-                    span = { GridItemSpan(maxCurrentLineSpan) }
+                    span = { GridItemSpan(maxCurrentLineSpan) },
                 ) { Header() }
                 items(items) { lesson ->
                     LessonCard(
                         lesson = lesson,
-                        onClick = { onLessonHeaderClick(lesson) }
+                        onClick = { onLessonHeaderClick(lesson) },
                     )
                 }
             }
@@ -130,33 +126,33 @@ fun WelcomePageContent(
 private fun Header() {
     Column(
         modifier = Modifier.width(IntrinsicSize.Min),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
             text = "Master Dutch through",
             style = MaterialTheme.typography.displayMedium.copy(
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
             ),
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
         Text(
             text = "Real News and Podcasts",
             style = MaterialTheme.typography.displayMedium.copy(
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.secondary
+                color = MaterialTheme.colorScheme.secondary,
             ),
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = "Listen, watch, and answer the questions.\n" +
-                    "Constantly new videos and questions!\n" +
-                    "The app is free and open source!\n" +
-                    "To support its operation and improve the service.",
+                "Constantly new videos and questions!\n" +
+                "The app is free and open source!\n" +
+                "To support its operation and improve the service.",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
         Spacer(modifier = Modifier.height(16.dp))
         Row {
@@ -167,12 +163,12 @@ private fun Header() {
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             ) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
                         modifier = Modifier.size(20.dp),
                         imageVector = Icons.Github,
-                        contentDescription = null
+                        contentDescription = null,
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(text = "SOURCES")
@@ -185,12 +181,12 @@ private fun Header() {
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             ) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
                         modifier = Modifier.size(20.dp),
                         imageVector = Icons.DonateBox,
-                        contentDescription = null
+                        contentDescription = null,
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(text = "DONATE")
@@ -212,20 +208,20 @@ private fun WelcomeTopBar() {
                         .size(32.dp)
                         .clip(RoundedCornerShape(8.dp))
                         .background(MaterialTheme.colorScheme.primaryContainer),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     Icon(
                         imageVector = Icons.School,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(20.dp),
                     )
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text = "OefOef",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
             }
         },
@@ -234,22 +230,22 @@ private fun WelcomeTopBar() {
             IconButton(
                 onClick = {
                     uriHandler.openUri("$MAILTO_LINK%3Cwrite%20something%20here%3E")
-                }
+                },
             ) {
                 Icon(
                     imageVector = Icons.EmailHeart,
                     contentDescription = "Support",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-        }
+        },
     )
 }
 
 @Composable
 private fun LessonCard(
     lesson: LessonHeader,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -263,13 +259,13 @@ private fun LessonCard(
                 .fillMaxWidth()
                 .aspectRatio(16f / 9f)
                 .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .background(MaterialTheme.colorScheme.surfaceVariant),
         ) {
             AsyncImage(
                 model = lesson.previewUrl,
                 contentDescription = lesson.title,
                 modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop,
             )
 
             // Duration badge
@@ -278,13 +274,13 @@ private fun LessonCard(
                     .align(Alignment.BottomEnd)
                     .padding(12.dp),
                 color = Color.Black.copy(alpha = 0.6f),
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(8.dp),
             ) {
                 Text(
                     text = formatDuration(lesson.lengthSeconds),
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                    color = Color.White
+                    color = Color.White,
                 )
             }
         }
@@ -293,7 +289,7 @@ private fun LessonCard(
             text = lesson.title,
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(top = 8.dp)
+            modifier = Modifier.padding(top = 8.dp),
         )
     }
 }

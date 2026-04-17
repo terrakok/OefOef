@@ -35,7 +35,7 @@ import com.github.terrakok.oefoef.ui.welcome.WelcomePage
 @Composable
 fun App(
     clientSpellcheck: ClientSpellcheck = DisabledClientSpellCheck(),
-    onThemeChanged: @Composable (isDark: Boolean) -> Unit = {}
+    onThemeChanged: @Composable (isDark: Boolean) -> Unit = {},
 ) = WithAppGraph(clientSpellcheck) {
     AppTheme(onThemeChanged) {
         val backStack = remember { mutableStateListOf<AppNavKey>(WelcomeScreen) }
@@ -60,18 +60,18 @@ fun App(
             popTransitionSpec = { ContentTransform(EnterTransition.None, ExitTransition.None) },
             entryDecorators = listOf(
                 rememberSaveableStateHolderNavEntryDecorator(),
-                rememberViewModelStoreNavEntryDecorator()
+                rememberViewModelStoreNavEntryDecorator(),
             ),
             entryProvider = entryProvider {
                 entry<WelcomeScreen> {
                     WelcomePage(
                         onLessonHeaderClick = { lesson ->
                             backStack.add(LessonScreen(lesson.id))
-                        }
+                        },
                     )
                 }
                 entry<LessonScreen>(
-                    metadata = SplitSceneStrategy.split()
+                    metadata = SplitSceneStrategy.split(),
                 ) {
                     LessonPage(
                         id = it.id,
@@ -81,24 +81,31 @@ fun App(
                         onBackClick = {
                             backStack.clear()
                             backStack.add(WelcomeScreen)
-                        }
+                        },
                     )
                 }
                 entry<OpenQuestionScreen> {
                     OpenQuestionPage(
                         id = it.id,
-                        onBackClick = { backStack.removeLast() }
+                        onBackClick = { backStack.removeLast() },
                     )
                 }
-            }
+            },
         )
     }
 }
 
 internal sealed interface AppNavKey : NavKey
+
 internal data object WelcomeScreen : AppNavKey
-internal data class LessonScreen(val id: String) : AppNavKey
-internal data class OpenQuestionScreen(val id: String) : AppNavKey
+
+internal data class LessonScreen(
+    val id: String,
+) : AppNavKey
+
+internal data class OpenQuestionScreen(
+    val id: String,
+) : AppNavKey
 
 @Composable
 internal expect fun BrowserNavigation(backStack: SnapshotStateList<AppNavKey>)

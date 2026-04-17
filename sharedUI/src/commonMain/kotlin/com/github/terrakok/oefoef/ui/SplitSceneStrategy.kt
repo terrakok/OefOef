@@ -28,7 +28,7 @@ internal fun <T : Any> rememberSplitSceneStrategy(): SplitSceneStrategy<T> {
 }
 
 class SplitSceneStrategy<T : Any>(
-    private val windowSizeClass: WindowSizeClass
+    private val windowSizeClass: WindowSizeClass,
 ) : SceneStrategy<T> {
     override fun SceneStrategyScope<T>.calculateScene(entries: List<NavEntry<T>>): Scene<T>? {
         if (!windowSizeClass.isWide()) return null
@@ -41,12 +41,13 @@ class SplitSceneStrategy<T : Any>(
             entries.last().contentKey.toString() + entries.size,
             entries[splitIndex],
             rightEntries.lastOrNull(),
-            entries.dropLast(1).filter { !it.metadata.containsKey(SPLIT_KEY) }
+            entries.dropLast(1).filter { !it.metadata.containsKey(SPLIT_KEY) },
         )
     }
 
     companion object {
         internal const val SPLIT_KEY = "split_strategy_key"
+
         fun split() = mapOf(SPLIT_KEY to Any())
     }
 }
@@ -55,24 +56,24 @@ class SplitScene<T : Any>(
     override val key: Any,
     val left: NavEntry<T>,
     val right: NavEntry<T>?,
-    override val previousEntries: List<NavEntry<T>>
+    override val previousEntries: List<NavEntry<T>>,
 ) : Scene<T> {
     override val entries = listOfNotNull(left, right)
     override val content: @Composable (() -> Unit) = {
         CompositionLocalProvider(
-            LocalIsSplitMode provides true
+            LocalIsSplitMode provides true,
         ) {
             Row(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
             ) {
                 Box(
                     modifier = Modifier.fillMaxHeight().weight(2f / 5f),
-                    content = { left.Content() }
+                    content = { left.Content() },
                 )
                 VerticalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
                 Box(
                     modifier = Modifier.fillMaxHeight().weight(3f / 5f),
-                    content = { right?.Content() }
+                    content = { right?.Content() },
                 )
             }
         }

@@ -27,7 +27,7 @@ fun LoadingWidgetPreview() {
             modifier = Modifier.size(400.dp, 200.dp),
             error = "Error",
             loading = false,
-            onReload = {}
+            onReload = {},
         )
     }
 }
@@ -37,28 +37,28 @@ fun LoadingWidget(
     modifier: Modifier = Modifier,
     error: String?,
     loading: Boolean,
-    onReload: () -> Unit
+    onReload: () -> Unit,
 ) {
     Box(
         modifier = modifier,
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         if (loading) {
             CircularProgressIndicator()
         } else if (error != null) {
             Surface(
                 shape = MaterialTheme.shapes.medium,
-                color = MaterialTheme.colorScheme.primaryContainer
+                color = MaterialTheme.colorScheme.primaryContainer,
             ) {
                 Column(
                     modifier = Modifier
                         .padding(16.dp)
                         .widthIn(max = 400.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
                         text = error,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     ElevatedButton(onClick = onReload) { Text("Reload") }

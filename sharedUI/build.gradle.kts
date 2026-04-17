@@ -83,7 +83,6 @@ kotlin {
             implementation(libs.navigation3.browser)
             implementation(npm("nspell", "2.1.5")) // spell checker
         }
-
     }
 
     targets

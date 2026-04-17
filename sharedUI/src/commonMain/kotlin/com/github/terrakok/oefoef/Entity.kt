@@ -28,27 +28,27 @@ data class Lesson(
 data class TranscriptionItem(
     val time: Int,
     val text: String,
-    val translationEn: String
+    val translationEn: String,
 )
 
 data class OpenQuestion(
     val id: String,
     val text: String,
-    val textEn: String
+    val textEn: String,
 )
 
 enum class FeedbackStatus {
     DRAFT,
     LOADING,
     ACTUAL,
-    OUTDATED
+    OUTDATED,
 }
 
 @Serializable
 data class FeedbackResult(
     val title: String,
     val message: String,
-    val isCorrect: Boolean
+    val isCorrect: Boolean,
 )
 
 @Serializable

@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 @AssistedInject
 class LessonViewModel(
     @Assisted val id: String,
-    val dataService: DataService
+    val dataService: DataService,
 ) : ViewModel() {
     @AssistedFactory
     @ManualViewModelAssistedFactoryKey(Factory::class)

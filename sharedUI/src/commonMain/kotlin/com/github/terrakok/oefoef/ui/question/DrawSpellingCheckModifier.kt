@@ -78,7 +78,7 @@ internal fun Modifier.drawSpellingChecks(
             drawPath(
                 path = path,
                 color = Color.Red,
-                style = Stroke(width = strokeWidth)
+                style = Stroke(width = strokeWidth),
             )
         }
     }

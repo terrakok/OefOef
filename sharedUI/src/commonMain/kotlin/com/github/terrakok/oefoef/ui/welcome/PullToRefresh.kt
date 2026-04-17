@@ -39,9 +39,8 @@ fun PullToRefreshBoxTouchOnly(
                 state = state,
                 isRefreshing = isRefreshing,
                 onRefresh = onRefresh,
-                enabled = isPullToRefreshEnabled
-            )
-            .pointerInput(Unit) {
+                enabled = isPullToRefreshEnabled,
+            ).pointerInput(Unit) {
                 awaitPointerEventScope {
                     val event = awaitPointerEvent(pass = PointerEventPass.Initial)
                     // enabled only when interacted using Touch

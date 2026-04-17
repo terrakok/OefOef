@@ -31,5 +31,5 @@ class YouTubeController {
 expect fun YouTubeWidget(
     videoId: String,
     controller: YouTubeController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 )

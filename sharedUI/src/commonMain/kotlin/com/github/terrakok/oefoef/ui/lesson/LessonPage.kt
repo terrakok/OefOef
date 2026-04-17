@@ -51,8 +51,8 @@ private fun LessonPagePreview() {
                 lengthSeconds = 0,
                 questions = emptyList(),
                 createdAt = Clock.System.now(),
-                lang = "nl_en"
-            )
+                lang = "nl_en",
+            ),
         )
     }
 }
@@ -61,7 +61,7 @@ private fun LessonPagePreview() {
 fun LessonPage(
     id: String,
     onLearnClick: (id: String) -> Unit = {},
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
 ) {
     val vm = assistedMetroViewModel<LessonViewModel, LessonViewModel.Factory>(key = id) {
         create(id)
@@ -71,7 +71,7 @@ fun LessonPage(
             modifier = Modifier.fillMaxSize(),
             error = vm.error,
             loading = vm.loading,
-            onReload = { vm.loadData() }
+            onReload = { vm.loadData() },
         )
         return
     }
@@ -79,7 +79,7 @@ fun LessonPage(
     LessonPageContent(
         lesson = vm.lesson!!,
         onLearnClick = { onLearnClick(id) },
-        onBackClick = onBackClick
+        onBackClick = onBackClick,
     )
 }
 
@@ -97,7 +97,7 @@ private fun LessonPageContent(
             TopAppBar(
                 title = {},
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = MaterialTheme.colorScheme.surface,
                 ),
                 navigationIcon = {
                     Row(
@@ -106,28 +106,29 @@ private fun LessonPageContent(
                             .clip(RoundedCornerShape(8.dp))
                             .clickable { onBackClick() }
                             .padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(
                             imageVector = Icons.Back,
                             contentDescription = "Back",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "Back to Main",
                             style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
-                }
+                },
             )
-        }
+        },
     ) { paddingValues ->
         Box(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 16.dp),
         ) {
             Column {
                 val playerController = remember { YouTubeController() }
@@ -137,20 +138,20 @@ private fun LessonPageContent(
                 VideoPlayerPlaceholder(
                     videoId = lesson.videoId,
                     controller = playerController,
-                    previewUrl = lesson.previewUrl
+                    previewUrl = lesson.previewUrl,
                 )
                 Spacer(modifier = Modifier.height(32.dp))
                 Row {
                     Text(
                         text = "TRANSCRIPT",
                         style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.outline
+                        color = MaterialTheme.colorScheme.outline,
                     )
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
                         text = "(Long tap to translate)",
                         style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.outline
+                        color = MaterialTheme.colorScheme.outline,
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
@@ -168,20 +169,20 @@ private fun LessonPageContent(
                 }
                 LaunchedEffect(activeSegmentIndex) {
                     state.animateScrollToItem(
-                        index = (activeSegmentIndex - 1).coerceAtLeast(0)
+                        index = (activeSegmentIndex - 1).coerceAtLeast(0),
                     )
                 }
 
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    state = state
+                    state = state,
                 ) {
                     itemsIndexed(lesson.videoTranscription) { index, textSegment ->
                         TextSegmentItem(
                             transcriptionItem = textSegment,
                             onClick = { playerController.seekTo(textSegment.time) },
                             isActive = index == activeSegmentIndex,
-                            onHold = { playerController.setOnPause(it) }
+                            onHold = { playerController.setOnPause(it) },
                         )
                     }
                     item {
@@ -216,7 +217,7 @@ private fun LessonPageContent(
 private fun VideoPlayerPlaceholder(
     videoId: String,
     controller: YouTubeController,
-    previewUrl: String
+    previewUrl: String,
 ) {
     Box(
         modifier = Modifier
@@ -224,7 +225,7 @@ private fun VideoPlayerPlaceholder(
             .aspectRatio(16f / 9f)
             .clip(RoundedCornerShape(16.dp))
             .background(MaterialTheme.colorScheme.secondary),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         if (!controller.play) {
             AsyncImage(
@@ -237,14 +238,14 @@ private fun VideoPlayerPlaceholder(
             Surface(
                 modifier = Modifier.size(64.dp),
                 shape = CircleShape,
-                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = Icons.Play,
                         contentDescription = "Play",
                         tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp).offset(x = 2.dp)
+                        modifier = Modifier.size(24.dp).offset(x = 2.dp),
                     )
                 }
             }
@@ -252,13 +253,13 @@ private fun VideoPlayerPlaceholder(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .clickable { controller.play = true }
+                .clickable { controller.play = true },
         )
         if (controller.play) {
             YouTubeWidget(
                 videoId = videoId,
                 controller = controller,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
             )
         }
     }
@@ -269,7 +270,7 @@ private fun TextSegmentItem(
     transcriptionItem: TranscriptionItem,
     onClick: () -> Unit,
     isActive: Boolean,
-    onHold: (Boolean) -> Unit = {}
+    onHold: (Boolean) -> Unit = {},
 ) {
     val timestampColor = if (isActive) {
         MaterialTheme.colorScheme.primary
@@ -288,9 +289,8 @@ private fun TextSegmentItem(
                     haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                     onHoldItem = true
                     onHold(true)
-                }
-            )
-            .pointerInput(Unit) {
+                },
+            ).pointerInput(Unit) {
                 awaitPointerEventScope {
                     while (true) {
                         val event = awaitPointerEvent()
@@ -302,9 +302,8 @@ private fun TextSegmentItem(
                         }
                     }
                 }
-            }
-            .background(if (isActive) MaterialTheme.colorScheme.primary else Color.Transparent)
-            .padding(start = 4.dp)
+            }.background(if (isActive) MaterialTheme.colorScheme.primary else Color.Transparent)
+            .padding(start = 4.dp),
     ) {
         Row(
             modifier = Modifier
@@ -317,20 +316,23 @@ private fun TextSegmentItem(
                 text = secondsToText(transcriptionItem.time),
                 style = MaterialTheme.typography.labelMedium.copy(
                     fontWeight = FontWeight.Bold,
-                    color = timestampColor
+                    color = timestampColor,
                 ),
-                modifier = Modifier.width(48.dp).alignByBaseline()
+                modifier = Modifier.width(48.dp).alignByBaseline(),
             )
             Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text =
-                    if (!onHoldItem) transcriptionItem.text
-                    else transcriptionItem.translationEn,
+                    if (!onHoldItem) {
+                        transcriptionItem.text
+                    } else {
+                        transcriptionItem.translationEn
+                    },
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = fontWeight,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 ),
-                modifier = Modifier.weight(1f).alignByBaseline()
+                modifier = Modifier.weight(1f).alignByBaseline(),
             )
         }
     }

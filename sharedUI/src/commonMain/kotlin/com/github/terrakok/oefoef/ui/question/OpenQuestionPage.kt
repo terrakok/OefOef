@@ -30,10 +30,10 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.github.terrakok.oefoef.MAILTO_LINK
 import com.github.terrakok.oefoef.EmptyFeedback
 import com.github.terrakok.oefoef.Feedback
 import com.github.terrakok.oefoef.FeedbackStatus
+import com.github.terrakok.oefoef.MAILTO_LINK
 import com.github.terrakok.oefoef.ui.Icons
 import com.github.terrakok.oefoef.ui.LoadingWidget
 import com.github.terrakok.oefoef.ui.LocalIsSplitMode
@@ -42,7 +42,7 @@ import dev.zacsweers.metrox.viewmodel.assistedMetroViewModel
 @Composable
 fun OpenQuestionPage(
     id: String,
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
 ) {
     val vm = assistedMetroViewModel<OpenQuestionViewModel, OpenQuestionViewModel.Factory>(key = id) {
         create(id)
@@ -52,7 +52,7 @@ fun OpenQuestionPage(
             modifier = Modifier.fillMaxSize(),
             error = vm.error,
             loading = vm.loading,
-            onReload = { vm.loadData() }
+            onReload = { vm.loadData() },
         )
         return
     }
@@ -71,7 +71,7 @@ fun OpenQuestionPage(
                         appendLine("<write something here>")
                     }
                     uriHandler.openUri("$MAILTO_LINK$body")
-                }
+                },
             )
         },
         bottomBar = {
@@ -79,38 +79,38 @@ fun OpenQuestionPage(
                 currentQuestionIndex = vm.currentQuestionIndex,
                 totalQuestions = lesson.questions.size,
                 onPreviousClick = vm::previousQuestion,
-                onNextClick = vm::nextQuestion
+                onNextClick = vm::nextQuestion,
             )
-        }
+        },
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(horizontal = 24.dp)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(rememberScrollState()),
         ) {
             Spacer(modifier = Modifier.height(48.dp))
             Text(
                 text = vm.question.text,
                 style = MaterialTheme.typography.headlineMedium.copy(
                     fontWeight = FontWeight.Medium,
-                    lineHeight = 40.sp
+                    lineHeight = 40.sp,
                 ),
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = vm.question.textEn,
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
             )
             Spacer(modifier = Modifier.height(48.dp))
 
             Text(
                 text = "Your answer:",
                 style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -140,7 +140,7 @@ fun OpenQuestionPage(
                 modifier = Modifier.fillMaxWidth(),
                 textStyle = MaterialTheme.typography.bodyLarge.copy(
                     fontSize = 20.sp,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 ),
                 onTextLayout = { textLayoutResult = it },
                 decorationBox = { innerTextField ->
@@ -151,8 +151,8 @@ fun OpenQuestionPage(
                                 modifier = Modifier.drawSpellingChecks(
                                     textLayoutResult,
                                     feedback.answer,
-                                    incorrectWords
-                                )
+                                    incorrectWords,
+                                ),
                             ) {
                                 innerTextField()
                             }
@@ -167,11 +167,11 @@ fun OpenQuestionPage(
                                 enabled = !isFeedbackLoading,
                                 isError = false,
                                 interactionSource = interactionSource,
-                                colors = colors
+                                colors = colors,
                             )
-                        }
+                        },
                     )
-                }
+                },
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -184,12 +184,12 @@ fun OpenQuestionPage(
 @Composable
 private fun TopBar(
     onBackClick: () -> Unit,
-    onFlagClick: () -> Unit
+    onFlagClick: () -> Unit,
 ) {
     TopAppBar(
         title = {},
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
         ),
         navigationIcon = {
             if (LocalIsSplitMode.current) {
@@ -197,21 +197,21 @@ private fun TopBar(
                     modifier = Modifier
                         .padding(start = 4.dp)
                         .padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Box(
                         modifier = Modifier
                             .size(8.dp)
                             .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary)
+                            .background(MaterialTheme.colorScheme.primary),
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "LISTENING PRACTICE",
                         style = MaterialTheme.typography.labelLarge.copy(
-                            letterSpacing = 1.sp
+                            letterSpacing = 1.sp,
                         ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                     )
                 }
             } else {
@@ -221,18 +221,18 @@ private fun TopBar(
                         .clip(RoundedCornerShape(8.dp))
                         .clickable { onBackClick() }
                         .padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
                         imageVector = Icons.Back,
                         contentDescription = "Back",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "Back to Video",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
@@ -242,10 +242,10 @@ private fun TopBar(
                 Icon(
                     imageVector = Icons.Flag,
                     contentDescription = "Report issue",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-        }
+        },
     )
 }
 
@@ -253,13 +253,13 @@ private fun TopBar(
 private fun FeedbackCard(
     currentAnswer: String,
     feedback: Feedback,
-    onCheckClick: () -> Unit = {}
+    onCheckClick: () -> Unit = {},
 ) {
     Column {
         val result = feedback.result
         Box(
             modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             OutlinedButton(
                 onClick = onCheckClick,
@@ -305,9 +305,9 @@ private fun FeedbackCard(
                 targetValue = 0.8f,
                 animationSpec = infiniteRepeatable(
                     animation = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
-                    repeatMode = RepeatMode.Reverse
+                    repeatMode = RepeatMode.Reverse,
                 ),
-                label = "alphaValue"
+                label = "alphaValue",
             )
 
             val actualAlpha = when (feedback.status) {
@@ -331,13 +331,13 @@ private fun FeedbackCard(
                     Surface(
                         modifier = Modifier.size(24.dp),
                         shape = CircleShape,
-                        color = MaterialTheme.colorScheme.surface
+                        color = MaterialTheme.colorScheme.surface,
                     ) {
                         Icon(
                             imageVector = icon,
                             contentDescription = null,
                             modifier = Modifier.size(12.dp).padding(4.dp),
-                            tint = color
+                            tint = color,
                         )
                     }
                     Spacer(modifier = Modifier.width(16.dp))
@@ -346,15 +346,15 @@ private fun FeedbackCard(
                             text = result.title,
                             style = MaterialTheme.typography.labelLarge.copy(
                                 fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.sp
+                                letterSpacing = 1.sp,
                             ),
-                            color = color.copy(alpha = 0.6f)
+                            color = color.copy(alpha = 0.6f),
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = result.message,
                             style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurface,
                         )
                     }
                 }
@@ -392,9 +392,8 @@ private fun BottomBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
@@ -402,16 +401,16 @@ private fun BottomBar(
                 onClick = onPreviousClick,
                 shape = RoundedCornerShape(50),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
                 ),
                 contentPadding = PaddingValues(horizontal = 16.dp),
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.padding(horizontal = 16.dp),
             ) {
                 Icon(
                     imageVector = Icons.ArrowRight,
                     contentDescription = null,
                     modifier = Modifier.size(20.dp).rotate(180f),
-                    tint = MaterialTheme.colorScheme.onPrimary
+                    tint = MaterialTheme.colorScheme.onPrimary,
                 )
             }
 
@@ -422,16 +421,16 @@ private fun BottomBar(
                 onClick = onNextClick,
                 shape = RoundedCornerShape(50),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
                 ),
                 contentPadding = PaddingValues(horizontal = 16.dp),
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.padding(horizontal = 16.dp),
             ) {
                 Icon(
                     imageVector = Icons.ArrowRight,
                     contentDescription = null,
                     modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.colorScheme.onPrimary
+                    tint = MaterialTheme.colorScheme.onPrimary,
                 )
             }
 

@@ -20,7 +20,7 @@ import kotlin.time.measureTimedValue
 @ViewModelKey(WelcomeViewModel::class)
 @Inject
 class WelcomeViewModel(
-    private val dataService: DataService
+    private val dataService: DataService,
 ) : ViewModel() {
     var items = mutableStateListOf<LessonHeader>()
         private set

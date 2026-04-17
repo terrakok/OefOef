@@ -27,7 +27,7 @@ class FeedbackService(
     private val settings: Settings,
     private val json: Json,
     private val clientSpellcheck: ClientSpellcheck,
-    appCoroutineScope: CoroutineScope
+    appCoroutineScope: CoroutineScope,
 ) {
     companion object {
         private const val FEEDBACK_STATE_KEY = "com.github.terrakok.oefoef.saved_feedback_key"
@@ -43,12 +43,12 @@ class FeedbackService(
 
     private val feedbackDataFlow: MutableSharedFlow<Map<String, Feedback>> = MutableSharedFlow(
         replay = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
 
     private val spellCheckRequestFlow = MutableSharedFlow<SpellCheckRequest>(
         replay = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
 
     init {
@@ -59,7 +59,8 @@ class FeedbackService(
                 feedbackData.putAll(json.decodeFromString<Map<String, Feedback>>(saved))
                 feedbackDataFlow.emit(feedbackData)
             }
-            feedbackDataFlow.debounce(1000)
+            feedbackDataFlow
+                .debounce(1000)
                 .collect {
                     Log.d("Saving feedback state")
                     settings.putString(FEEDBACK_STATE_KEY, json.encodeToString(it))
@@ -75,16 +76,23 @@ class FeedbackService(
                     saveFeedback(
                         request.lessonId,
                         request.questionId,
-                        prev.copy(spellcheck = SpellcheckResult(incorrectWords))
+                        prev.copy(spellcheck = SpellcheckResult(incorrectWords)),
                     )
                 }
             }
         }
     }
 
-    private fun feedbackId(lessonId: String, questionId: String) = "$lessonId/$questionId"
+    private fun feedbackId(
+        lessonId: String,
+        questionId: String,
+    ) = "$lessonId/$questionId"
 
-    private fun saveFeedback(lessonId: String, questionId: String, feedback: Feedback?) {
+    private fun saveFeedback(
+        lessonId: String,
+        questionId: String,
+        feedback: Feedback?,
+    ) {
         synchronized(feedbackSynchronizedObject) {
             val id = feedbackId(lessonId, questionId)
             if (feedback == null) {
@@ -98,7 +106,7 @@ class FeedbackService(
 
     private fun getFeedback(
         lessonId: String,
-        questionId: String
+        questionId: String,
     ): Feedback = synchronized(feedbackSynchronizedObject) {
         val id = feedbackId(lessonId, questionId)
         feedbackData[id] ?: EmptyFeedback()
@@ -106,7 +114,7 @@ class FeedbackService(
 
     fun getFeedbackState(
         lessonId: String,
-        questionId: String
+        questionId: String,
     ): Flow<Feedback> {
         val id = feedbackId(lessonId, questionId)
         return feedbackDataFlow.map { it[id] ?: EmptyFeedback() }
@@ -115,11 +123,11 @@ class FeedbackService(
     fun updateAnswer(
         lessonId: String,
         questionId: String,
-        answer: String
+        answer: String,
     ) {
         val prev = getFeedback(lessonId, questionId)
 
-        val newStatus = when  {
+        val newStatus = when {
             prev.lastCheckedAnswer == null -> FeedbackStatus.DRAFT
             prev.lastCheckedAnswer.trim() == answer.trim() -> FeedbackStatus.ACTUAL
             else -> FeedbackStatus.OUTDATED
@@ -133,7 +141,7 @@ class FeedbackService(
 
     suspend fun checkAnswer(
         lessonId: String,
-        questionId: String
+        questionId: String,
     ) {
         val prev = getFeedback(lessonId, questionId)
         if (prev.answer.isBlank()) {
@@ -149,7 +157,7 @@ class FeedbackService(
                 result = processFeedback(feedbackResponse),
                 status = FeedbackStatus.ACTUAL,
                 spellcheck = SpellcheckResult.EMPTY, // the local spellchecker is not perfect, prefer the feedbackResponse
-                lastCheckedAnswer = prev.answer
+                lastCheckedAnswer = prev.answer,
             )
             saveFeedback(lessonId, questionId, feedback)
         } catch (e: Throwable) {
@@ -159,32 +167,31 @@ class FeedbackService(
                 Feedback(
                     prev.answer,
                     FeedbackResult("Error", "Network error: $e", false),
-                    FeedbackStatus.ACTUAL
-                )
+                    FeedbackStatus.ACTUAL,
+                ),
             )
         }
     }
 
-    private suspend fun processFeedback(response: DataService.CheckAnswerResponse): FeedbackResult =
-        withContext(Dispatchers.Default) {
-            if (response.error != null) {
-                FeedbackResult("Try again", "Unknown error", false)
-            } else {
-                val regex = Regex("""Score:\s*([0-9]+(?:\.[0-9]+)?)\s*/\s*([0-9]+(?:\.[0-9]+)?)""")
-                val match = regex.find(response.result ?: "")
-                val score = match?.destructured?.component1()?.toFloatOrNull() ?: 0f
-                val title = if (score > 2) "Good" else "Improve your answer"
-                FeedbackResult(title, response.result ?: "No feedback", score >= 3f)
-            }
+    private suspend fun processFeedback(response: DataService.CheckAnswerResponse): FeedbackResult = withContext(Dispatchers.Default) {
+        if (response.error != null) {
+            FeedbackResult("Try again", "Unknown error", false)
+        } else {
+            val regex = Regex("""Score:\s*([0-9]+(?:\.[0-9]+)?)\s*/\s*([0-9]+(?:\.[0-9]+)?)""")
+            val match = regex.find(response.result ?: "")
+            val score = match?.destructured?.component1()?.toFloatOrNull() ?: 0f
+            val title = if (score > 2) "Good" else "Improve your answer"
+            FeedbackResult(title, response.result ?: "No feedback", score >= 3f)
         }
+    }
 }
 
 private data class SpellCheckRequest(
     val lessonId: String,
     val questionId: String,
-    val answer: String
+    val answer: String,
 )
 
 private val wordRegex = Regex("""\p{L}+""")
-private fun String.extractWords(): List<String> =
-    wordRegex.findAll(this).map { it.value }.toList()
+
+private fun String.extractWords(): List<String> = wordRegex.findAll(this).map { it.value }.toList()

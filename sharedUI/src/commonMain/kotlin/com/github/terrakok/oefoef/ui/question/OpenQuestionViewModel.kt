@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 class OpenQuestionViewModel(
     @Assisted val id: String,
     val dataService: DataService,
-    val feedbackService: FeedbackService
+    val feedbackService: FeedbackService,
 ) : ViewModel() {
     @AssistedFactory
     @ManualViewModelAssistedFactoryKey(Factory::class)
