@@ -6,8 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.terrakok.oefoef.DataService
-import com.github.terrakok.oefoef.LessonHeader
+import com.github.terrakok.oefoef.domain.DataRepository
+import com.github.terrakok.oefoef.entity.LessonHeader
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
@@ -20,7 +20,7 @@ import kotlin.time.measureTimedValue
 @ViewModelKey(WelcomeViewModel::class)
 @Inject
 class WelcomeViewModel(
-    private val dataService: DataService,
+    private val dataRepository: DataRepository,
 ) : ViewModel() {
     var items = mutableStateListOf<LessonHeader>()
         private set
@@ -42,7 +42,7 @@ class WelcomeViewModel(
                 loading = true
                 error = null
                 items.clear()
-                items.addAll(dataService.getLessons())
+                items.addAll(dataRepository.getLessons())
             } catch (e: Throwable) {
                 error = e.message
             } finally {
@@ -56,7 +56,7 @@ class WelcomeViewModel(
             try {
                 isRefreshing = true
                 val (freshList, duration) = measureTimedValue {
-                    dataService.getLessons(forceRefresh = true)
+                    dataRepository.getLessons(forceRefresh = true)
                 }
                 if (duration.inWholeMilliseconds < 300) {
                     // A delay for smoother refresh UX (otherwise the indicator disappears to fast)

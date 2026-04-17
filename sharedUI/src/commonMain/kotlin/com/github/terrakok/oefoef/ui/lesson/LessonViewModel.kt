@@ -5,8 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.terrakok.oefoef.DataService
-import com.github.terrakok.oefoef.Lesson
+import com.github.terrakok.oefoef.domain.DataRepository
+import com.github.terrakok.oefoef.entity.Lesson
 import dev.zacsweers.metro.*
 import dev.zacsweers.metrox.viewmodel.ManualViewModelAssistedFactory
 import dev.zacsweers.metrox.viewmodel.ManualViewModelAssistedFactoryKey
@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 @AssistedInject
 class LessonViewModel(
     @Assisted val id: String,
-    val dataService: DataService,
+    val dataRepository: DataRepository,
 ) : ViewModel() {
     @AssistedFactory
     @ManualViewModelAssistedFactoryKey(Factory::class)
@@ -41,7 +41,7 @@ class LessonViewModel(
             try {
                 loading = true
                 error = null
-                lesson = dataService.getLesson(id)
+                lesson = dataRepository.getLesson(id)
             } catch (e: Throwable) {
                 error = e.message
             } finally {

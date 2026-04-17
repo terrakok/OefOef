@@ -1,9 +1,4 @@
-package com.github.terrakok.oefoef.spellcheck
-
-import dev.zacsweers.metro.AppScope
-import dev.zacsweers.metro.ContributesBinding
-import dev.zacsweers.metro.Inject
-import dev.zacsweers.metro.SingleIn
+package com.github.terrakok.oefoef.domain
 
 interface ClientSpellcheck {
     val enabled: Boolean

@@ -5,11 +5,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.terrakok.oefoef.DataService
-import com.github.terrakok.oefoef.Feedback
-import com.github.terrakok.oefoef.FeedbackService
-import com.github.terrakok.oefoef.Lesson
-import com.github.terrakok.oefoef.OpenQuestion
+import com.github.terrakok.oefoef.domain.DataRepository
+import com.github.terrakok.oefoef.domain.FeedbackService
+import com.github.terrakok.oefoef.entity.Feedback
+import com.github.terrakok.oefoef.entity.Lesson
+import com.github.terrakok.oefoef.entity.OpenQuestion
 import dev.zacsweers.metro.*
 import dev.zacsweers.metrox.viewmodel.ManualViewModelAssistedFactory
 import dev.zacsweers.metrox.viewmodel.ManualViewModelAssistedFactoryKey
@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 @AssistedInject
 class OpenQuestionViewModel(
     @Assisted val id: String,
-    val dataService: DataService,
+    val dataRepository: DataRepository,
     val feedbackService: FeedbackService,
 ) : ViewModel() {
     @AssistedFactory
@@ -52,7 +52,7 @@ class OpenQuestionViewModel(
             try {
                 loading = true
                 error = null
-                lesson = dataService.getLesson(id)
+                lesson = dataRepository.getLesson(id)
             } catch (e: Throwable) {
                 error = e.message
             } finally {

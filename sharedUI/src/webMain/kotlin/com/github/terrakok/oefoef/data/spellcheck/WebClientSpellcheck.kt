@@ -1,4 +1,4 @@
-package com.github.terrakok.oefoef.spellcheck
+package com.github.terrakok.oefoef.data.spellcheck
 
 import com.github.terrakok.oefoef.domain.ClientSpellcheck
 import oefoef.sharedui.generated.resources.Res

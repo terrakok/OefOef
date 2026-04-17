@@ -6,21 +6,21 @@
 ---
 
 ## 🔑 Quick Reference for LLM Agents & Humans
-| Rule                    | Implementation                                                                 |
-|-------------------------|--------------------------------------------------------------------------------|
-| **Architecture**        | Clean Architecture + MVVM                                                      |
-| **State Flow**          | `mutableStateOf` / `mutableStateListOf` in ViewModel → `by collectAsState()` in Compose |
-| **Async**               | `viewModelScope.launch` + `Flow` pipelines                                     |
-| **Error/Loading**       | Compose `mutableStateOf` / `mutableStateListOf` in ViewModel (UI layer only)   |
-| **DI**                  | Metro https://github.com/ZacSweers/metro        |
-| **Navigation**          | Navigation 3 https://developer.android.com/guide/navigation/navigation-3 |
-| **Package Root**        | `com.example.app`                                                              |
-| **UI Packages**         | `com.example.app.ui.{feature}`                                                 |
-| **Domain Packages**     | `com.example.app.domain.{feature}`                                             |
-| **Repository Packages** | `com.example.app.data.{feature}`                                               |
-| **Base Packages**       | `com.example.app.entity`                       |
-| **Build**               | Kotlin DSL + Version Catalog (`libs.versions.toml`)                            |
-| **Platform Code**       | `expect/actual` only for system APIs, never for UI                             |
+| Rule                | Implementation                                                                          |
+|---------------------|-----------------------------------------------------------------------------------------|
+| **Architecture**    | Clean Architecture + MVVM                                                               |
+| **State Flow**      | `mutableStateOf` / `mutableStateListOf` in ViewModel → `by collectAsState()` in Compose |
+| **Async**           | `viewModelScope.launch` + `Flow` pipelines                                              |
+| **Error/Loading**   | Compose `mutableStateOf` / `mutableStateListOf` in ViewModel (UI layer only)            |
+| **DI**              | Metro https://github.com/ZacSweers/metro                                                |
+| **Navigation**      | Navigation 3 https://developer.android.com/guide/navigation/navigation-3                |
+| **Package Root**    | `com.example.app`                                                                       |
+| **UI Packages**     | `com.example.app.ui.{feature}`                                                          |
+| **Domain Packages** | `com.example.app.domain.{...}Service` and `com.example.app.domain.{...}Repository`      |
+| **Base Packages**   | `com.example.app.entity`                                                                |
+| **Build**           | Kotlin DSL + Version Catalog (`libs.versions.toml`)                                     |
+| **DI modules**      | `com.example.app.DI.kt`                                                                 |
+| **Global configs**  | `com.example.app.Global.kt`                                                             |
 
 ---
 
@@ -47,23 +47,18 @@ commonMain/kotlin/com/example/app/
 │   ├── common/                  # ← Shared UI utilities, themes, router
 │   └── theme/                   # ← Material3, ColorScheme, Typography
 ├── domain/                      # ← Business logic
-│   ├── auth/
-│   │   ├── AuthService.kt       # ← [Feature]Service
-│   └── core/                    # ← Base interfaces, Result, Constants
-├── data/                        # ← Infrastructure: API, DB, Cache, Mappers
-│   ├── auth/
-│   │   ├── AuthRemoteRepository.kt
-│   │   ├── AuthLocalRepository.kt
-│   │   └── AuthRepository.kt
-├── Entity.kt                     # ← Base data classes, DTOs, Entities
-├── DI.kt                         # ← DI modules
-└── App.kt                        # ← entry point for platforms
+│   ├── AuthService.kt           # ← [Feature]Service
+│   └── DataRepository.kt        # ← Infrastructure: API, DB, Cache, Mappers
+├── entity/
+│   └── Entity.kt                # ← Base data classes, DTOs, Entities
+├── DI.kt                        # ← DI modules
+├── Global.kt                    # ← global configs: debug flag, logger etc.
+└── App.kt                       # ← entry point for platforms
 ```
 **Rules:**
 - Each feature lives in `ui.{feature}`
 - Feature-specific components stay in the same package
-- Domain contains services only (repository interfaces are unnecessary for single implementations)
-- Data contains direct repository implementations injected via `@Inject`
+- Domain contains services and repositories (interfaces are unnecessary for single implementations)
 - `Entity` holds platform-agnostic data models
 - `DI` holds DI modules and factories
 
@@ -75,12 +70,11 @@ commonMain/kotlin/com/example/app/
 ```
 - **UI:** Pure Compose. No business logic. Only observes state and handles user input.
 - **ViewModel:** Manages UI state using Compose `mutableStateOf` / `mutableStateListOf`, coordinates domain calls, exposes state via `Flow<T>` for reactive streams.
-- **Domain:** Contains `*Service` (business operations). Framework-agnostic.
-- **Data:** Direct repository implementations (injected via `@Inject`), handles remote/local fetching, caching, and mapping to `entity/`.
+- **Domain:** Contains `*Service` (business operations) and `*Repository` implementations (handles remote/local fetching, caching, and mapping to `entity/`).
 
 **Repository Example (direct implementation):**
 ```kotlin
-// data/auth/AuthRepository.kt
+// domen/AuthRepository.kt
 class AuthRepository @Inject constructor(
     private val remote: AuthRemoteRepository,
     private val local: AuthLocalRepository

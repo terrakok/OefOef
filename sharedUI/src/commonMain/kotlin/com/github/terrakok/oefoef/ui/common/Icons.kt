@@ -1,4 +1,4 @@
-package com.github.terrakok.oefoef.ui
+package com.github.terrakok.oefoef.ui.common
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor

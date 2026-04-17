@@ -1,11 +1,6 @@
 package com.github.terrakok.oefoef.ui.question
 
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -30,13 +25,13 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.github.terrakok.oefoef.EmptyFeedback
-import com.github.terrakok.oefoef.Feedback
-import com.github.terrakok.oefoef.FeedbackStatus
 import com.github.terrakok.oefoef.MAILTO_LINK
-import com.github.terrakok.oefoef.ui.Icons
-import com.github.terrakok.oefoef.ui.LoadingWidget
-import com.github.terrakok.oefoef.ui.LocalIsSplitMode
+import com.github.terrakok.oefoef.entity.EmptyFeedback
+import com.github.terrakok.oefoef.entity.Feedback
+import com.github.terrakok.oefoef.entity.FeedbackStatus
+import com.github.terrakok.oefoef.ui.common.Icons
+import com.github.terrakok.oefoef.ui.common.LoadingWidget
+import com.github.terrakok.oefoef.ui.common.LocalIsSplitMode
 import dev.zacsweers.metrox.viewmodel.assistedMetroViewModel
 
 @Composable

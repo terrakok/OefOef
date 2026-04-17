@@ -2,11 +2,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.window.ComposeUIViewController
 import com.github.terrakok.oefoef.App
-import platform.UIKit.UIApplication
-import platform.UIKit.UIStatusBarStyleDarkContent
-import platform.UIKit.UIStatusBarStyleLightContent
-import platform.UIKit.UIViewController
-import platform.UIKit.setStatusBarStyle
+import platform.UIKit.*
 
 fun MainViewController(): UIViewController = ComposeUIViewController {
     App(onThemeChanged = { ThemeChanged(it) })

@@ -1,17 +1,12 @@
 package com.github.terrakok.oefoef
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
-import com.github.terrakok.oefoef.spellcheck.ClientSpellcheck
-import com.github.terrakok.oefoef.spellcheck.DisabledClientSpellCheck
+import com.github.terrakok.oefoef.domain.ClientSpellcheck
 import com.russhwolf.settings.Settings
 import dev.zacsweers.metro.*
 import dev.zacsweers.metrox.viewmodel.*
 import io.ktor.client.*
 import io.ktor.client.plugins.*
-import io.ktor.client.plugins.cache.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.logging.*
 import io.ktor.serialization.kotlinx.json.*
@@ -65,21 +60,6 @@ internal interface AppGraph : ViewModelGraph {
         fun create(
             @Provides spellChecker: ClientSpellcheck,
         ): AppGraph
-    }
-}
-
-@Composable
-internal fun WithAppGraph(
-    clientSpellcheck: ClientSpellcheck,
-    content: @Composable () -> Unit,
-) {
-    val graph = remember {
-        createGraphFactory<AppGraph.Factory>().create(clientSpellcheck)
-    }
-    CompositionLocalProvider(
-        LocalMetroViewModelFactory provides graph.metroViewModelFactory,
-    ) {
-        content()
     }
 }
 

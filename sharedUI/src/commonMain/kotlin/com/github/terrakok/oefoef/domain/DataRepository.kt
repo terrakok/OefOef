@@ -1,22 +1,19 @@
-package com.github.terrakok.oefoef
+package com.github.terrakok.oefoef.domain
 
+import com.github.terrakok.oefoef.entity.Lesson
+import com.github.terrakok.oefoef.entity.LessonHeader
+import com.github.terrakok.oefoef.entity.OpenQuestion
+import com.github.terrakok.oefoef.entity.TranscriptionItem
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.plugins.timeout
-import io.ktor.client.request.get
-import io.ktor.client.request.parameter
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.plugins.*
+import io.ktor.client.request.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.float
-import kotlinx.serialization.json.int
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.*
 import kotlin.time.Instant
 
 data class ApiConfiguration(
@@ -53,9 +50,9 @@ data class ApiConfiguration(
     }
 }
 
-@Inject
 @SingleIn(AppScope::class)
-class DataService(
+@Inject
+class DataRepository(
     private val httpClient: HttpClient,
     private val apiConfiguration: ApiConfiguration = ApiConfiguration.OEF_OEF,
 ) {

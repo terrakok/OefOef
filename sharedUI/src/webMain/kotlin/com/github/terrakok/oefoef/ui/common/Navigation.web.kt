@@ -1,4 +1,4 @@
-package com.github.terrakok.oefoef
+package com.github.terrakok.oefoef.ui.common
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf

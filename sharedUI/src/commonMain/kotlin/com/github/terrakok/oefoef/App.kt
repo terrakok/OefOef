@@ -4,32 +4,35 @@ import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
-import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.github.terrakok.oefoef.spellcheck.ClientSpellcheck
-import com.github.terrakok.oefoef.spellcheck.DisabledClientSpellCheck
-import com.github.terrakok.oefoef.ui.AppTheme
-import com.github.terrakok.oefoef.ui.SplitSceneStrategy
+import com.github.terrakok.oefoef.domain.ClientSpellcheck
+import com.github.terrakok.oefoef.domain.DisabledClientSpellCheck
+import com.github.terrakok.oefoef.ui.common.AppNavKey
+import com.github.terrakok.oefoef.ui.common.AppTheme
+import com.github.terrakok.oefoef.ui.common.BrowserNavigation
+import com.github.terrakok.oefoef.ui.common.LessonScreen
+import com.github.terrakok.oefoef.ui.common.OpenQuestionScreen
+import com.github.terrakok.oefoef.ui.common.SplitSceneStrategy
+import com.github.terrakok.oefoef.ui.common.WelcomeScreen
+import com.github.terrakok.oefoef.ui.common.rememberSplitSceneStrategy
 import com.github.terrakok.oefoef.ui.lesson.LessonPage
 import com.github.terrakok.oefoef.ui.question.OpenQuestionPage
-import com.github.terrakok.oefoef.ui.rememberSplitSceneStrategy
 import com.github.terrakok.oefoef.ui.welcome.WelcomePage
+import dev.zacsweers.metro.createGraphFactory
+import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 
 @Preview
 @Composable
@@ -95,17 +98,17 @@ fun App(
     }
 }
 
-internal sealed interface AppNavKey : NavKey
-
-internal data object WelcomeScreen : AppNavKey
-
-internal data class LessonScreen(
-    val id: String,
-) : AppNavKey
-
-internal data class OpenQuestionScreen(
-    val id: String,
-) : AppNavKey
-
 @Composable
-internal expect fun BrowserNavigation(backStack: SnapshotStateList<AppNavKey>)
+internal fun WithAppGraph(
+    clientSpellcheck: ClientSpellcheck,
+    content: @Composable () -> Unit,
+) {
+    val graph = remember {
+        createGraphFactory<AppGraph.Factory>().create(clientSpellcheck)
+    }
+    CompositionLocalProvider(
+        LocalMetroViewModelFactory provides graph.metroViewModelFactory,
+    ) {
+        content()
+    }
+}

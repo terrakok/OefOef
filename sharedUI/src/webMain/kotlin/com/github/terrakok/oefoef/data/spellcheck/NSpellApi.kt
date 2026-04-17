@@ -1,7 +1,7 @@
 @file:OptIn(ExperimentalWasmJsInterop::class)
 @file:JsModule("nspell")
 
-package com.github.terrakok.oefoef.spellcheck
+package com.github.terrakok.oefoef.data.spellcheck
 
 import kotlin.js.*
 

@@ -1,4 +1,4 @@
-package com.github.terrakok.oefoef
+package com.github.terrakok.oefoef.entity
 
 import androidx.compose.runtime.Immutable
 import kotlinx.serialization.Serializable

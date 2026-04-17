@@ -1,29 +1,26 @@
-package com.github.terrakok.oefoef
+package com.github.terrakok.oefoef.domain
 
-import com.github.terrakok.oefoef.spellcheck.ClientSpellcheck
+import com.github.terrakok.oefoef.Log
+import com.github.terrakok.oefoef.entity.*
 import com.russhwolf.settings.Settings
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 
 @OptIn(FlowPreview::class)
 @SingleIn(AppScope::class)
 @Inject
 class FeedbackService(
-    private val dataService: DataService,
+    private val dataRepository: DataRepository,
     private val settings: Settings,
     private val json: Json,
     private val clientSpellcheck: ClientSpellcheck,
@@ -151,7 +148,7 @@ class FeedbackService(
 
         try {
             saveFeedback(lessonId, questionId, prev.copy(status = FeedbackStatus.LOADING))
-            val feedbackResponse = dataService.checkAnswer(lessonId, questionId, prev.answer)
+            val feedbackResponse = dataRepository.checkAnswer(lessonId, questionId, prev.answer)
             val feedback = Feedback(
                 answer = prev.answer,
                 result = processFeedback(feedbackResponse),
@@ -166,14 +163,14 @@ class FeedbackService(
                 questionId,
                 Feedback(
                     prev.answer,
-                    FeedbackResult("Error", "Network error: $e", false),
+                    FeedbackResult("Try again", "Network error: $e", false),
                     FeedbackStatus.ACTUAL,
                 ),
             )
         }
     }
 
-    private suspend fun processFeedback(response: DataService.CheckAnswerResponse): FeedbackResult = withContext(Dispatchers.Default) {
+    private suspend fun processFeedback(response: DataRepository.CheckAnswerResponse): FeedbackResult = withContext(Dispatchers.Default) {
         if (response.error != null) {
             FeedbackResult("Try again", "Unknown error", false)
         } else {

@@ -1,4 +1,4 @@
-package com.github.terrakok.oefoef.ui
+package com.github.terrakok.oefoef.ui.common
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.Surface
