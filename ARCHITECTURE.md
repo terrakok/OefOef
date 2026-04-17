@@ -54,17 +54,18 @@ commonMain/kotlin/com/example/app/
 │   ├── auth/
 │   │   ├── AuthRemoteRepository.kt
 │   │   ├── AuthLocalRepository.kt
-│   │   └── AuthRepository.kt     # ← Direct implementation (no interface)
-├── entity/                      # ← Base data classes, DTOs, Entities
-└── di/                          # ← DI modules
+│   │   └── AuthRepository.kt
+├── Entity.kt                     # ← Base data classes, DTOs, Entities
+├── DI.kt                         # ← DI modules
+└── App.kt                        # ← entry point for platforms
 ```
 **Rules:**
 - Each feature lives in `ui.{feature}`
 - Feature-specific components stay in the same package
 - Domain contains services only (repository interfaces are unnecessary for single implementations)
 - Data contains direct repository implementations injected via `@Inject`
-- `entity/` holds platform-agnostic data models
-- `di/` holds DI modules and factories
+- `Entity` holds platform-agnostic data models
+- `DI` holds DI modules and factories
 
 ---
 
@@ -90,7 +91,7 @@ class AuthRepository @Inject constructor(
 ```
 
 **Rules:**
-- When a repository has a single implementation, skip the interface entirely. Inject the class directly via `@Inject`.
+- When a repository has a single implementation, skip the interface entirely. Inject the class directly via `@Inject` into the Service.
 - Only introduce an interface when there are multiple implementations (e.g., platform-specific behavior, mock for testing, or feature flags).
 
 ---
@@ -342,7 +343,6 @@ NavDisplay(
 Navigation 3 uses typed destinations (`NavKey`), user-owned back stacks (`SnapshotStateList`), and `NavDisplay` instead of `NavHost`.
 
 ```kotlin
-// navigation/Routes.kt
 @Serializable
 sealed interface Route : NavKey {
     @Serializable
@@ -352,51 +352,13 @@ sealed interface Route : NavKey {
     data class Profile(val userId: String) : Route
 }
 
-// navigation/Router.kt
-class NavigationState(
-    private val routes: Array<out NavKey> = arrayOf(Route.Home, Route.Profile)
-) {
-    private val _backStack = mutableListOf<Route>(Route.Home)
-    val backStack: List<Route> = _backStack
-    
-    private val _navigator = Navigator(_backStack)
-    val navigator = _navigator
-}
-
-@Composable
-fun rememberNavigationState(): NavigationState {
-    // KMP: use SavedStateConfiguration with SerializersModule
-    val config = SavedStateConfiguration {
-        serializersModule = SerializersModule {
-            polymorphic(NavKey::class) {
-                subclassesOfSealed<Route>()
-            }
+// KMP: use SavedStateConfiguration with SerializersModule
+val config = SavedStateConfiguration {
+    serializersModule = SerializersModule {
+        polymorphic(NavKey::class) {
+            subclassesOfSealed<Route>()
         }
     }
-    return rememberSaveable(saver = NavigationStateSaver) { NavigationState() }
-}
-
-// navigation/Navigation.kt
-@Composable
-fun AppNavHost(navState: NavigationState) {
-    NavDisplay(
-        backStack = navState.backStack,
-        entryDecorators = listOf(
-            rememberSaveableStateHolderNavEntryDecorator(),
-            rememberViewModelStoreNavEntryDecorator()
-        ),
-        entryProvider = entryProvider {
-            entry<HomeScreen> {
-                HomeScreen(onNavigateToProfile = navState.navigator::navigate)
-            }
-            entry<ProfileScreen> {
-                ProfileScreen(
-                    userId = it.userId,
-                    onBack = navState.navigator::pop
-                )
-            }
-        }
-    )
 }
 ```
 
