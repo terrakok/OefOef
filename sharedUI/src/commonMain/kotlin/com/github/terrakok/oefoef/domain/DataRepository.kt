@@ -1,5 +1,6 @@
 package com.github.terrakok.oefoef.domain
 
+import com.github.terrakok.oefoef.entity.ArticlesGymExercise
 import com.github.terrakok.oefoef.entity.Lesson
 import com.github.terrakok.oefoef.entity.LessonHeader
 import com.github.terrakok.oefoef.entity.OpenQuestion
@@ -14,6 +15,7 @@ import io.ktor.client.request.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.*
+import oefoef.sharedui.generated.resources.Res
 import kotlin.time.Instant
 
 data class ApiConfiguration(
@@ -53,6 +55,7 @@ data class ApiConfiguration(
 @SingleIn(AppScope::class)
 @Inject
 class DataRepository(
+    private val json: Json,
     private val httpClient: HttpClient,
     private val apiConfiguration: ApiConfiguration = ApiConfiguration.OEF_OEF,
 ) {
@@ -161,6 +164,10 @@ class DataRepository(
         }
 
         return CheckAnswerResponse(result = jo.getValue("result").jsonPrimitive.content)
+    }
+
+    suspend fun getArticlesTrainingExercises(): List<ArticlesGymExercise> {
+        return httpClient.get(apiConfiguration.apiUrl + "/gym/articles").body()
     }
 
     data class CheckAnswerResponse(

@@ -44,7 +44,10 @@ private fun WelcomePagePreview() {
 }
 
 @Composable
-fun WelcomePage(onLessonHeaderClick: (LessonHeader) -> Unit = {}) {
+fun WelcomePage(
+    onLessonHeaderClick: (LessonHeader) -> Unit = {},
+    onGymClick: () -> Unit = {},
+) {
     val vm = metroViewModel<WelcomeViewModel>()
     if (vm.loading || vm.error != null) {
         LoadingWidget(
@@ -61,6 +64,7 @@ fun WelcomePage(onLessonHeaderClick: (LessonHeader) -> Unit = {}) {
         onLessonHeaderClick = onLessonHeaderClick,
         onPullToRefresh = { vm.refresh() },
         isRefreshing = vm.isRefreshing,
+        onGymClick = onGymClick,
     )
 }
 
@@ -70,6 +74,7 @@ fun WelcomePageContent(
     onLessonHeaderClick: (LessonHeader) -> Unit = {},
     isRefreshing: Boolean = false,
     onPullToRefresh: () -> Unit = {},
+    onGymClick: () -> Unit = {},
 ) {
     val state = rememberLazyGridState()
     val ptrState = rememberPullToRefreshState()
@@ -80,6 +85,18 @@ fun WelcomePageContent(
                 shadowElevation = if (state.canScrollBackward) 8.dp else 0.dp,
             ) {
                 WelcomeTopBar()
+            }
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onGymClick,
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.primary,
+            ) {
+                Icon(
+                    imageVector = Icons.BrainGym,
+                    contentDescription = "Gym",
+                )
             }
         },
         containerColor = MaterialTheme.colorScheme.surface,

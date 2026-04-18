@@ -8,12 +8,18 @@ internal sealed interface AppNavKey : NavKey
 
 internal data object WelcomeScreen : AppNavKey
 
+internal data object GymScreen : AppNavKey
+
 internal data class LessonScreen(
     val id: String,
 ) : AppNavKey
 
 internal data class OpenQuestionScreen(
     val id: String,
+) : AppNavKey
+
+internal data class ArticlesGymScreen(
+    val exerciseIndex: Int = 0,
 ) : AppNavKey
 
 @Composable

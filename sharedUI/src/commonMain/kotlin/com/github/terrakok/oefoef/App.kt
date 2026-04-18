@@ -28,9 +28,13 @@ import com.github.terrakok.oefoef.ui.common.OpenQuestionScreen
 import com.github.terrakok.oefoef.ui.common.SplitSceneStrategy
 import com.github.terrakok.oefoef.ui.common.WelcomeScreen
 import com.github.terrakok.oefoef.ui.common.rememberSplitSceneStrategy
+import com.github.terrakok.oefoef.ui.articlesgym.ArticlesGymPage
+import com.github.terrakok.oefoef.ui.common.ArticlesGymScreen
+import com.github.terrakok.oefoef.ui.common.GymScreen
 import com.github.terrakok.oefoef.ui.lesson.LessonPage
 import com.github.terrakok.oefoef.ui.question.OpenQuestionPage
 import com.github.terrakok.oefoef.ui.welcome.WelcomePage
+import com.github.terrakok.oefoef.ui.gym.GymPage
 import dev.zacsweers.metro.createGraphFactory
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 
@@ -71,6 +75,9 @@ fun App(
                         onLessonHeaderClick = { lesson ->
                             backStack.add(LessonScreen(lesson.id))
                         },
+                        onGymClick = {
+                            backStack.add(GymScreen)
+                        }
                     )
                 }
                 entry<LessonScreen>(
@@ -90,6 +97,20 @@ fun App(
                 entry<OpenQuestionScreen> {
                     OpenQuestionPage(
                         id = it.id,
+                        onBackClick = { backStack.removeLast() },
+                    )
+                }
+                entry<ArticlesGymScreen> {
+                    ArticlesGymPage(
+                        initialExerciseIndex = it.exerciseIndex,
+                        onBackClick = { backStack.removeLast() },
+                    )
+                }
+                entry<GymScreen> {
+                    GymPage(
+                        onArticlesClick = {
+                            backStack.add(ArticlesGymScreen(0))
+                        },
                         onBackClick = { backStack.removeLast() },
                     )
                 }
