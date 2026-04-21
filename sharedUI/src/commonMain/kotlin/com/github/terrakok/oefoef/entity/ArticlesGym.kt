@@ -46,13 +46,10 @@ data class ArticlesGymExercise(
             .joinToString("")
             .replace(" ", "\\s*")
 
-
     companion object {
         private val EXPLANATION_REGEX = Regex("^`(.+?)`\\s*-\\s*(.+)$")
         private val PLACEHOLDER_REGEX = Regex("\\(\\?\\d+\\)")
-
     }
-
 }
 
 @JvmInline

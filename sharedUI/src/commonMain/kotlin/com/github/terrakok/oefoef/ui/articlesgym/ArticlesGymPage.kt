@@ -1,33 +1,21 @@
 package com.github.terrakok.oefoef.ui.articlesgym
 
 import androidx.compose.animation.*
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withLink
-import androidx.compose.ui.text.LinkAnnotation
-import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -37,8 +25,9 @@ import androidx.compose.ui.unit.sp
 import com.github.terrakok.oefoef.entity.ArticleAnswer
 import com.github.terrakok.oefoef.entity.ArticleCheckState
 import com.github.terrakok.oefoef.entity.ArticleChoice
+import com.github.terrakok.oefoef.entity.ArticlesGymExercise
+import com.github.terrakok.oefoef.entity.ParsedExplanation
 import com.github.terrakok.oefoef.ui.common.Icons
-import com.github.terrakok.oefoef.ui.common.LocalIsSplitMode
 import com.github.terrakok.oefoef.ui.common.LoadingWidget
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 
@@ -60,9 +49,6 @@ fun ArticlesGymPage(
 
     val exercise = vm.currentExercise ?: return
     val exercises = vm.exercises ?: return
-
-    var selectedPlaceholder by remember { mutableStateOf<Int?>(null) }
-    var menuOffset by remember { mutableStateOf(DpOffset.Zero) }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
@@ -97,6 +83,9 @@ fun ArticlesGymPage(
             )
 
             Box {
+                var selectedPlaceholder by remember { mutableStateOf<Int?>(null) }
+                var menuOffset by remember { mutableStateOf(DpOffset.Zero) }
+
                 PassageWithPlaceholders(
                     passage = exercise.sentenceWithPlaceholders,
                     placeholderCount = exercise.placeholderCount,
@@ -107,22 +96,15 @@ fun ArticlesGymPage(
                     answers = vm.answers,
                 )
 
-                Box(modifier = Modifier.offset(menuOffset.x, menuOffset.y)) {
-                    DropdownMenu(
-                        expanded = selectedPlaceholder != null,
-                        onDismissRequest = { selectedPlaceholder = null },
-                    ) {
-                        ArticleChoice.values.forEach { choice ->
-                            DropdownMenuItem(
-                                text = { Text(choice.value) },
-                                onClick = {
-                                    vm.onAnswerUpdated(selectedPlaceholder!! - 1, choice)
-                                    selectedPlaceholder = null
-                                }
-                            )
-                        }
+                ArticleDropdownMenu(
+                    expanded = selectedPlaceholder != null,
+                    offset = menuOffset,
+                    onDismissRequest = { selectedPlaceholder = null },
+                    onArticleSelected = { choice ->
+                        vm.onAnswerUpdated(selectedPlaceholder!! - 1, choice)
+                        selectedPlaceholder = null
                     }
-                }
+                )
             }
 
             AnimatedVisibility(
@@ -130,51 +112,61 @@ fun ArticlesGymPage(
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically(),
             ) {
-                Column(
-                    modifier = Modifier
-                        .widthIn(max = 600.dp)
-                        .fillMaxWidth()
-                        .padding(top = 32.dp),
-                    horizontalAlignment = Alignment.Start
-                ) {
-                    Text(
-                        text = "WELL DONE!",
-                        style = MaterialTheme.typography.headlineSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 2.sp
-                        ),
-                        color = Color(0xFF2E7D32),
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-                    exercise.parsedExplanations.forEach { parsed ->
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp),
-                            color = MaterialTheme.colorScheme.surfaceContainerLow,
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(16.dp),
-                                horizontalAlignment = Alignment.Start
-                            ) {
-                                    Text(
-                                        text = parsed.answer,
-                                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                                        textAlign = TextAlign.Start
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = parsed.explanation,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        textAlign = TextAlign.Start
-                                    )
-                                }
-                        }
-                    }
-                }
+                SuccessSection(exercise)
             }
+        }
+    }
+}
+
+@Composable
+private fun SuccessSection(exercise: ArticlesGymExercise) {
+    Column(
+        modifier = Modifier
+            .widthIn(max = 600.dp)
+            .fillMaxWidth()
+            .padding(top = 32.dp),
+        horizontalAlignment = Alignment.Start
+    ) {
+        Text(
+            text = "WELL DONE!",
+            style = MaterialTheme.typography.headlineSmall.copy(
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 2.sp
+            ),
+            color = Color(0xFF2E7D32),
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+        exercise.parsedExplanations.forEach { parsed ->
+            ExplanationCard(parsed)
+        }
+    }
+}
+
+@Composable
+private fun ExplanationCard(parsedExplanation: ParsedExplanation) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+            Text(
+                text = parsedExplanation.answer,
+                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                textAlign = TextAlign.Start
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = parsedExplanation.explanation,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Start
+            )
         }
     }
 }
@@ -190,49 +182,25 @@ private fun TopBar(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
         ),
         navigationIcon = {
-            if (LocalIsSplitMode.current) {
-                Row(
-                    modifier = Modifier
-                        .padding(start = 4.dp)
-                        .padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary),
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "ARTICLES GYM",
-                        style = MaterialTheme.typography.labelLarge.copy(
-                            letterSpacing = 1.sp,
-                        ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                    )
-                }
-            } else {
-                Row(
-                    modifier = Modifier
-                        .padding(start = 4.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable { onBackClick() }
-                        .padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Icon(
-                        imageVector = Icons.Back,
-                        contentDescription = "Back",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Back",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+            Row(
+                modifier = Modifier
+                    .padding(start = 4.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable { onBackClick() }
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    imageVector = Icons.Back,
+                    contentDescription = "Back",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Back",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
     )
@@ -298,8 +266,6 @@ private fun BottomBar(
     }
 }
 
-
-
 @Composable
 fun PassageWithPlaceholders(
     passage: String,
@@ -346,23 +312,7 @@ private fun buildAnnotatedStringWithPlaceholders(
             append(passage.substring(lastIndex, match.range.first))
             val placeholderId = match.groupValues[1].toInt()
             val answer = answers.getOrNull(placeholderId - 1)
-            val textStyle = when (answer?.state) {
-                ArticleCheckState.Correct -> SpanStyle(
-                    background = Color(0xFFC8E6C9),
-                    fontWeight = FontWeight.Medium,
-                    color = Color(0xFF2E7D32),
-                )
-                ArticleCheckState.Incorrect -> SpanStyle(
-                    background = Color(0xFFFFCDD2),
-                    fontWeight = FontWeight.Medium,
-                    color = Color(0xFFC62828),
-                )
-                ArticleCheckState.Pending, null -> SpanStyle(
-                    background = Color(0xFFFFFFE0),
-                    fontWeight = FontWeight.Thin,
-                    fontStyle = FontStyle.Italic,
-                )
-            }
+            val textStyle = getSpanStyleForState(answer?.state)
             withLink(
                 LinkAnnotation.Clickable(
                     tag = "placeholder",
@@ -370,14 +320,56 @@ private fun buildAnnotatedStringWithPlaceholders(
                     linkInteractionListener = { onPlaceholderClick(placeholderId) }
                 )
             ) {
-                if (answer?.choice != null) {
-                    append("[ ${answer.choice.value} ]")
+                val label = if (answer?.choice != null) {
+                    "[ ${answer.choice.value} ]"
                 } else {
-                    append("[ ? ]")
+                    "[ ? ]"
                 }
+                append(label)
             }
             lastIndex = match.range.last + 1
         }
         append(passage.substring(lastIndex))
     }
 }
+
+@Composable
+private fun ArticleDropdownMenu(
+    expanded: Boolean,
+    offset: DpOffset,
+    onDismissRequest: () -> Unit,
+    onArticleSelected: (ArticleChoice) -> Unit,
+) {
+    Box(modifier = Modifier.offset(offset.x, offset.y)) {
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = onDismissRequest,
+        ) {
+            ArticleChoice.values.forEach { choice ->
+                DropdownMenuItem(
+                    text = { Text(choice.value) },
+                    onClick = { onArticleSelected(choice) }
+                )
+            }
+        }
+    }
+}
+
+private fun getSpanStyleForState(state: ArticleCheckState?): SpanStyle =
+    when (state) {
+        ArticleCheckState.Correct -> SpanStyle(
+            background = Color(0xFFC8E6C9),
+            fontWeight = FontWeight.Medium,
+            color = Color(0xFF2E7D32),
+        )
+        ArticleCheckState.Incorrect -> SpanStyle(
+            background = Color(0xFFFFCDD2),
+            fontWeight = FontWeight.Medium,
+            color = Color(0xFFC62828),
+        )
+        ArticleCheckState.Pending, null -> SpanStyle(
+            background = Color(0xFFFFFFE0),
+            fontWeight = FontWeight.Thin,
+            fontStyle = FontStyle.Italic,
+        )
+    }
