@@ -8,6 +8,10 @@ internal sealed interface AppNavKey : NavKey
 
 internal data object WelcomeScreen : AppNavKey
 
+internal data object GymScreen : AppNavKey
+
+internal data object ArticlesGymScreen : AppNavKey
+
 internal data class LessonScreen(
     val id: String,
 ) : AppNavKey

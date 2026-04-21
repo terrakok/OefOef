@@ -1,5 +1,6 @@
 package com.github.terrakok.oefoef.domain
 
+import com.github.terrakok.oefoef.entity.ArticlesGymExercise
 import com.github.terrakok.oefoef.entity.Lesson
 import com.github.terrakok.oefoef.entity.LessonHeader
 import com.github.terrakok.oefoef.entity.OpenQuestion
@@ -161,6 +162,10 @@ class DataRepository(
         }
 
         return CheckAnswerResponse(result = jo.getValue("result").jsonPrimitive.content)
+    }
+
+    suspend fun getArticlesTrainingExercises(): List<ArticlesGymExercise> {
+        return httpClient.get(apiConfiguration.apiUrl + "/gym/articles").body()
     }
 
     data class CheckAnswerResponse(
