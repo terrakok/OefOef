@@ -15,7 +15,6 @@ import io.ktor.client.request.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.*
-import oefoef.sharedui.generated.resources.Res
 import kotlin.time.Instant
 
 data class ApiConfiguration(
@@ -55,7 +54,6 @@ data class ApiConfiguration(
 @SingleIn(AppScope::class)
 @Inject
 class DataRepository(
-    private val json: Json,
     private val httpClient: HttpClient,
     private val apiConfiguration: ApiConfiguration = ApiConfiguration.OEF_OEF,
 ) {
