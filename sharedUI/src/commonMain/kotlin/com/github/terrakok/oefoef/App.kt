@@ -102,15 +102,12 @@ fun App(
                 }
                 entry<ArticlesGymScreen> {
                     ArticlesGymPage(
-                        initialExerciseIndex = it.exerciseIndex,
                         onBackClick = { backStack.removeLast() },
                     )
                 }
                 entry<GymScreen> {
                     GymPage(
-                        onArticlesClick = {
-                            backStack.add(ArticlesGymScreen(0))
-                        },
+                        onArticlesClick = { backStack.add(ArticlesGymScreen) },
                         onBackClick = { backStack.removeLast() },
                     )
                 }

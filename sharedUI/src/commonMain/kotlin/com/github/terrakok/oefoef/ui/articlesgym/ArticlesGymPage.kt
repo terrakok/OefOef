@@ -43,16 +43,13 @@ import com.github.terrakok.oefoef.entity.parseExplanation
 import com.github.terrakok.oefoef.ui.common.Icons
 import com.github.terrakok.oefoef.ui.common.LocalIsSplitMode
 import com.github.terrakok.oefoef.ui.common.LoadingWidget
-import dev.zacsweers.metrox.viewmodel.assistedMetroViewModel
+import dev.zacsweers.metrox.viewmodel.metroViewModel
 
 @Composable
 fun ArticlesGymPage(
-    initialExerciseIndex: Int,
     onBackClick: () -> Unit = {},
 ) {
-    val vm = assistedMetroViewModel<ArticlesGymViewModel, ArticlesGymViewModel.Factory>(key = initialExerciseIndex.toString()) {
-        create(initialExerciseIndex)
-    }
+    val vm = metroViewModel<ArticlesGymViewModel>()
 
     if (vm.loading || vm.error != null) {
         LoadingWidget(

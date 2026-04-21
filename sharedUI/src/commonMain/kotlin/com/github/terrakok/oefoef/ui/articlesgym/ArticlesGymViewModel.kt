@@ -1,35 +1,22 @@
 package com.github.terrakok.oefoef.ui.articlesgym
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.oefoef.domain.DataRepository
-import com.github.terrakok.oefoef.entity.ArticleAnswer
-import com.github.terrakok.oefoef.entity.ArticleCheckState
-import com.github.terrakok.oefoef.entity.ArticleChoice
-import com.github.terrakok.oefoef.entity.ArticlesGymExercise
-import com.github.terrakok.oefoef.entity.calculateCorrectChoices
-import dev.zacsweers.metro.*
-import dev.zacsweers.metrox.viewmodel.ManualViewModelAssistedFactory
-import dev.zacsweers.metrox.viewmodel.ManualViewModelAssistedFactoryKey
+import com.github.terrakok.oefoef.entity.*
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesIntoMap
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import kotlinx.coroutines.launch
 
-@AssistedInject
+@ContributesIntoMap(AppScope::class)
+@ViewModelKey(ArticlesGymViewModel::class)
+@Inject
 class ArticlesGymViewModel(
-    @Assisted val exerciseIndex: Int,
     val dataRepository: DataRepository,
 ) : ViewModel() {
-    @AssistedFactory
-    @ManualViewModelAssistedFactoryKey(Factory::class)
-    @ContributesIntoMap(AppScope::class)
-    interface Factory : ManualViewModelAssistedFactory {
-        fun create(exerciseIndex: Int): ArticlesGymViewModel
-    }
-
     var exercises by mutableStateOf<List<ArticlesGymExercise>?>(null)
         private set
 
@@ -39,7 +26,7 @@ class ArticlesGymViewModel(
     var error by mutableStateOf<String?>(null)
         private set
 
-    var currentExerciseIndex by mutableIntStateOf(exerciseIndex)
+    var currentExerciseIndex by mutableIntStateOf(0)
         private set
 
     private val _answers = mutableStateListOf<ArticleAnswer?>()

@@ -15,7 +15,7 @@ internal actual fun BrowserNavigation(backStack: SnapshotStateList<AppNavKey>) {
                 is WelcomeScreen -> ""
                 is LessonScreen -> "#/lesson/${key.id}"
                 is OpenQuestionScreen -> "#/lesson/${key.id}"
-                is ArticlesGymScreen -> "#/articles-gym/${key.exerciseIndex}"
+                is ArticlesGymScreen -> "#/articles-gym"
                 is GymScreen -> "#/gym"
             }
         },
