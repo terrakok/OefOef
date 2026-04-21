@@ -85,7 +85,7 @@ fun GymPage(
 @Composable
 private fun TopBar(onBackClick: () -> Unit) {
     TopAppBar(
-        title = { Text("Practice Gym") },
+        title = { Text("Dutch Grammar Gym") },
         navigationIcon = {
             IconButton(onClick = onBackClick) {
                 Icon(imageVector = Icons.Back, contentDescription = "Back")

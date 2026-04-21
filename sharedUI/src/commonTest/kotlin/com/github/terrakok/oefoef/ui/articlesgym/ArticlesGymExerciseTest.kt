@@ -3,8 +3,6 @@ package com.github.terrakok.oefoef.ui.articlesgym
 import com.github.terrakok.oefoef.entity.ArticleCheckState
 import com.github.terrakok.oefoef.entity.ArticleChoice
 import com.github.terrakok.oefoef.entity.ArticlesGymExercise
-import com.github.terrakok.oefoef.entity.checkAnswers
-import com.github.terrakok.oefoef.entity.parseExplanation
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -129,16 +127,19 @@ class ArticlesGymExerciseTest {
 
     @Test
     fun testParseExplanation() {
-        val explanation = "`de` - used for masculine and feminine nouns"
-        val parsed = explanation.parseExplanation()
-        assertEquals("de", parsed?.answer)
-        assertEquals("used for masculine and feminine nouns", parsed?.explanation)
-    }
+        val exercise = ArticlesGymExercise(
+            verbatimSentence = "De man loopt naar de winkel.",
+            sentenceWithPlaceholders = "(?1) man loopt naar (?2) winkel.",
+            placeholderCount = 2,
+            explanations = listOf(
+                "`de` - used for masculine and feminine nouns",
+                "`de` - used for masculine and feminine nouns"
+            )
+        )
 
-    @Test
-    fun testParseExplanationInvalid() {
-        val explanation = "invalid explanation"
-        val parsed = explanation.parseExplanation()
-        assertEquals(null, parsed)
+        assertEquals("de", exercise.parsedExplanations[0].answer)
+        assertEquals("used for masculine and feminine nouns", exercise.parsedExplanations[0].explanation)
+        assertEquals("de", exercise.parsedExplanations[1].answer)
+        assertEquals("used for masculine and feminine nouns", exercise.parsedExplanations[1].explanation)
     }
 }

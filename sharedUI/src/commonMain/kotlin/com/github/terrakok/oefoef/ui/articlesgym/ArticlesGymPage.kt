@@ -32,14 +32,11 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
 import com.github.terrakok.oefoef.entity.ArticleAnswer
 import com.github.terrakok.oefoef.entity.ArticleCheckState
 import com.github.terrakok.oefoef.entity.ArticleChoice
-import com.github.terrakok.oefoef.entity.parseExplanation
 import com.github.terrakok.oefoef.ui.common.Icons
 import com.github.terrakok.oefoef.ui.common.LocalIsSplitMode
 import com.github.terrakok.oefoef.ui.common.LoadingWidget
@@ -149,8 +146,7 @@ fun ArticlesGymPage(
                         color = Color(0xFF2E7D32),
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
-                    exercise.explanations.forEach { explanation ->
-                        val parsed = explanation.parseExplanation()
+                    exercise.parsedExplanations.forEach { parsed ->
                         Surface(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -158,11 +154,10 @@ fun ArticlesGymPage(
                             color = MaterialTheme.colorScheme.surfaceContainerLow,
                             shape = RoundedCornerShape(12.dp)
                         ) {
-                            if (parsed != null) {
-                                Column(
-                                    modifier = Modifier.padding(16.dp),
-                                    horizontalAlignment = Alignment.Start
-                                ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                horizontalAlignment = Alignment.Start
+                            ) {
                                     Text(
                                         text = parsed.answer,
                                         style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
@@ -176,14 +171,6 @@ fun ArticlesGymPage(
                                         textAlign = TextAlign.Start
                                     )
                                 }
-                            } else {
-                                Text(
-                                    text = explanation,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    modifier = Modifier.padding(16.dp),
-                                    textAlign = TextAlign.Start
-                                )
-                            }
                         }
                     }
                 }
