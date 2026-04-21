@@ -88,3 +88,14 @@ fun ArticlesGymExercise.calculateCorrectChoices(): List<ArticleChoice> {
     }
     return choices
 }
+
+fun ArticlesGymExercise.checkAnswers(userChoices: List<ArticleChoice?>): List<ArticleCheckState> {
+    val correctOnes = calculateCorrectChoices()
+    return userChoices.mapIndexed { index, choice ->
+        when {
+            choice == null -> ArticleCheckState.Pending
+            choice == correctOnes.getOrNull(index) -> ArticleCheckState.Correct
+            else -> ArticleCheckState.Incorrect
+        }
+    }
+}

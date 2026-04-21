@@ -32,8 +32,6 @@ class ArticlesGymViewModel(
     private val _answers = mutableStateListOf<ArticleAnswer?>()
     val answers: List<ArticleAnswer?> get() = _answers
 
-    private var correctChoices = listOf<ArticleChoice>()
-
     val currentExercise: ArticlesGymExercise? get() = exercises?.getOrNull(currentExerciseIndex)
 
     init {
@@ -56,10 +54,9 @@ class ArticlesGymViewModel(
     }
 
     fun isAllCorrect(): Boolean {
-        if (correctChoices.size != currentExercise?.placeholderCount) return false
-        return _answers.indices.all { idx ->
-            _answers[idx]?.choice == correctChoices.getOrNull(idx)
-        }
+        val exercise = currentExercise ?: return false
+        val states = exercise.checkAnswers(_answers.map { it?.choice })
+        return states.all { it == ArticleCheckState.Correct }
     }
 
     fun onAnswerUpdated(placeholderIndex: Int, answer: ArticleChoice) {
@@ -74,12 +71,10 @@ class ArticlesGymViewModel(
 
     fun checkAnswers() {
         val exercise = currentExercise ?: return
-        for (idx in 0 until exercise.placeholderCount) {
+        val states = exercise.checkAnswers(_answers.map { it?.choice })
+        states.forEachIndexed { idx, state ->
             val current = _answers[idx]
-            val isCorrect = current?.choice == correctChoices.getOrNull(idx)
-            _answers[idx] = current?.copy(
-                state = if (isCorrect) ArticleCheckState.Correct else ArticleCheckState.Incorrect
-            )
+            _answers[idx] = current?.copy(state = state)
         }
     }
 
@@ -105,7 +100,6 @@ class ArticlesGymViewModel(
         while (_answers.size > exercise.placeholderCount) {
             _answers.removeAt(_answers.size - 1)
         }
-        correctChoices = exercise.calculateCorrectChoices()
     }
 
     private fun checkIfAllFilledAndVerify() {
