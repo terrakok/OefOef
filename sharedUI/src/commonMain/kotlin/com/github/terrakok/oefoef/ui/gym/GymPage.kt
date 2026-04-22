@@ -167,6 +167,8 @@ private fun CategoryCard(
                     text = description,
                     style = MaterialTheme.typography.bodyMedium,
                     color = if (isActive) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                    minLines = 2,
+                    maxLines = 2,
                 )
             }
         }
