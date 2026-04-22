@@ -320,10 +320,11 @@ private fun buildAnnotatedStringWithPlaceholders(
                     linkInteractionListener = { onPlaceholderClick(placeholderId) }
                 )
             ) {
+                // Use NBSP instead of regular spaces to prevent line breaking
                 val label = if (answer?.choice != null) {
-                    "[ ${answer.choice.value} ]"
+                    "[\u00A0${answer.choice.value}\u00A0]"
                 } else {
-                    "[ ? ]"
+                    "[\u00A0?\u00A0]"
                 }
                 append(label)
             }
