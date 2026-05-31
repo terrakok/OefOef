@@ -8,16 +8,13 @@ import com.github.terrakok.navigation3.browser.HierarchicalBrowserNavigation
 
 @Composable
 internal actual fun BrowserNavigation(backStack: SnapshotStateList<AppNavKey>) {
-    HierarchicalBrowserNavigation(
-        currentDestination = remember { derivedStateOf { backStack.lastOrNull() } },
-        currentDestinationName = {
-            when (val key = it as AppNavKey) {
-                is WelcomeScreen -> ""
-                is LessonScreen -> "#/lesson/${key.id}"
-                is OpenQuestionScreen -> "#/lesson/${key.id}"
-                is ArticlesGymScreen -> "#/articles-gym"
-                is GymScreen -> "#/gym"
-            }
-        },
-    )
+    HierarchicalBrowserNavigation {
+        when (val key = backStack.lastOrNull() as AppNavKey) {
+            is WelcomeScreen -> ""
+            is LessonScreen -> "#/lesson/${key.id}"
+            is OpenQuestionScreen -> "#/lesson/${key.id}"
+            is ArticlesGymScreen -> "#/articles-gym"
+            is GymScreen -> "#/gym"
+        }
+    }
 }
