@@ -5,9 +5,6 @@ on:
     branches:
       - main
 
-permissions:
-  contents: write
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -18,10 +15,10 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
-          distribution: 'temurin'
-          java-version: '21'
+          distribution: 'jetbrains'
+          java-version: '25'
 
       - uses: gradle/actions/setup-gradle@v4
         with:
@@ -30,8 +27,9 @@ jobs:
       - name: Build
         run: ./gradlew :webApp:composeCompatibilityBrowserDistribution
 
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v4
         with:
-          branch: gh-pages
-          folder: webApp/build/dist/composeWebCompatibility/productionExecutable
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy webApp/build/dist/composeWebCompatibility/productionExecutable --project-name=oefoef
