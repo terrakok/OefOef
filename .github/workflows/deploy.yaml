@@ -32,4 +32,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy webApp/build/dist/composeWebCompatibility/productionExecutable --project-name=oefoef
+          command: pages deploy public webApp/build/dist/composeWebCompatibility/productionExecutable --project-name=oefoef
