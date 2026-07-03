@@ -16,18 +16,24 @@ import kotlinx.coroutines.channels.getOrElse
 actual fun YouTubeWidget(
     videoId: String,
     controller: YouTubeController,
-    modifier: Modifier
+    modifier: Modifier,
 ) {
     Box(
         modifier = modifier,
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         val lifecycle = LocalLifecycleOwner.current.lifecycle
         var player: YouTubePlayer? by remember { mutableStateOf(null) }
 
         LaunchedEffect(player) {
             player?.let { p ->
-                p.loadVideo(videoId, controller.seek.tryReceive().getOrElse { 0 }.toFloat())
+                p.loadVideo(
+                    videoId,
+                    controller.seek
+                        .tryReceive()
+                        .getOrElse { 0 }
+                        .toFloat(),
+                )
                 for (position in controller.seek) {
                     p.seekTo(position.toFloat())
                 }
@@ -48,17 +54,17 @@ actual fun YouTubeWidget(
 
                             override fun onCurrentSecond(
                                 youTubePlayer: YouTubePlayer,
-                                second: Float
+                                second: Float,
                             ) {
                                 controller.onProgress(second.toInt())
                             }
-                        }
+                        },
                     )
                 }
             },
             onRelease = { view ->
                 view.release()
-            }
+            },
         )
     }
 }

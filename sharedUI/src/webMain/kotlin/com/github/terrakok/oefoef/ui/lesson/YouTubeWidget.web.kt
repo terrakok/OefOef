@@ -21,7 +21,7 @@ import kotlin.js.js
 actual fun YouTubeWidget(
     videoId: String,
     controller: YouTubeController,
-    modifier: Modifier
+    modifier: Modifier,
 ) {
     Box(modifier) {
         HtmlElementView(
@@ -80,7 +80,8 @@ private fun releaseYoutubePlayer() {
     js("releaseYoutubePlayer()")
 }
 
-private fun jsPlayer(videoId: String) = """
+private fun jsPlayer(videoId: String) =
+    """
     var progressListener;
     function setYoutubeProgressListener(callback) {
       progressListener = callback;
@@ -169,4 +170,4 @@ private fun jsPlayer(videoId: String) = """
         configurePlayer();
       }
     }
-""".trimIndent()
+    """.trimIndent()

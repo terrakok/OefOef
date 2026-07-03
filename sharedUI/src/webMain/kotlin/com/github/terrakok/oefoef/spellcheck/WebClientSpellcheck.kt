@@ -1,19 +1,15 @@
 package com.github.terrakok.oefoef.spellcheck
 
+import com.github.terrakok.oefoef.domain.ClientSpellcheck
 import oefoef.sharedui.generated.resources.Res
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.toArray
 
-private suspend fun readDictionary(name: String): String {
-    return Res.readBytes("files/dict/$name").decodeToString()
-}
+private suspend fun readDictionary(name: String): String = Res.readBytes("files/dict/$name").decodeToString()
 
-private suspend fun createNSpell(): NSpell =
-    nspell(readDictionary("nl.aff"), readDictionary("nl.dic"))
-
+private suspend fun createNSpell(): NSpell = nspell(readDictionary("nl.aff"), readDictionary("nl.dic"))
 
 class WebClientSpellcheck : ClientSpellcheck {
-
     override val enabled: Boolean = true
 
     private var nSpell: NSpell? = null
