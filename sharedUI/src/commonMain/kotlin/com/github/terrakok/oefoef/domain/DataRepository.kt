@@ -85,7 +85,11 @@ class DataRepository(
                         ),
                     )
                 }.sortedByDescending { it.createdAt }
-            headers.addAll(new)
+
+            if (new.isNotEmpty()) {
+                headers.clear()
+                headers.addAll(new)
+            }
         }
         headers
     }
