@@ -773,4 +773,51 @@ object Icons {
             }
         }.build()
     }
+
+    val ChevronUp by lazy {
+        ImageVector
+            .Builder(
+                name = "chevron_up",
+                defaultWidth = 24.dp,
+                defaultHeight = 24.dp,
+                viewportWidth = 24f,
+                viewportHeight = 24f,
+            ).apply {
+                path(
+                    fill = SolidColor(Color.Black),
+                ) {
+                    moveTo(12f, 8f)
+                    lineToRelative(-6f, 6f)
+                    lineToRelative(1.41f, 1.41f)
+                    lineTo(12f, 10.83f)
+                    lineToRelative(4.59f, 4.58f)
+                    lineTo(18f, 14f)
+                    close()
+                }
+            }.build()
+    }
+
+    val ChevronDown by lazy {
+        ImageVector
+            .Builder(
+                name = "chevron_down",
+                defaultWidth = 24.dp,
+                defaultHeight = 24.dp,
+                viewportWidth = 24f,
+                viewportHeight = 24f,
+            ).apply {
+                path(
+                    fill = SolidColor(Color.Black),
+                ) {
+                    moveTo(16.59f, 8.59f)
+                    lineTo(12f, 13.17f)
+                    lineTo(7.41f, 8.59f)
+                    lineTo(6f, 10f)
+                    lineToRelative(6f, 6f)
+                    lineToRelative(6f, -6f)
+                    close()
+                }
+            }.build()
+    }
 }
+

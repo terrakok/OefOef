@@ -1,5 +1,6 @@
 package com.github.terrakok.oefoef.ui.lesson
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -11,6 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -133,14 +135,33 @@ private fun LessonPageContent(
             Column {
                 val playerController = remember { YouTubeController() }
                 val videoProgress by playerController.progress.receiveAsFlow().collectAsState(0)
+                var isVideoMinimized by rememberSaveable { mutableStateOf(false) }
 
                 Spacer(modifier = Modifier.height(16.dp))
-                VideoPlayerPlaceholder(
-                    videoId = lesson.videoId,
-                    controller = playerController,
-                    previewUrl = lesson.previewUrl,
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .animateContentSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    VideoPlayerPlaceholder(
+                        videoId = lesson.videoId,
+                        controller = playerController,
+                        previewUrl = lesson.previewUrl,
+                        modifier = if (isVideoMinimized) {
+                            Modifier.height(110.dp)
+                        } else {
+                            Modifier.fillMaxWidth()
+                        },
+                    )
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                VideoResizeToggleButton(
+                    isMinimized = isVideoMinimized,
+                    onToggle = { isVideoMinimized = !isVideoMinimized },
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
                 )
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(16.dp))
                 Row {
                     Text(
                         text = "TRANSCRIPT",
@@ -218,10 +239,10 @@ private fun VideoPlayerPlaceholder(
     videoId: String,
     controller: YouTubeController,
     previewUrl: String,
+    modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier
             .aspectRatio(16f / 9f)
             .clip(RoundedCornerShape(16.dp))
             .background(MaterialTheme.colorScheme.secondary),
@@ -342,4 +363,22 @@ private fun secondsToText(seconds: Int): String {
     val mins = seconds / 60
     val secs = seconds % 60
     return "${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}"
+}
+
+@Composable
+private fun VideoResizeToggleButton(
+    isMinimized: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    IconButton(
+        onClick = onToggle,
+        modifier = modifier.size(32.dp),
+    ) {
+        Icon(
+            imageVector = if (isMinimized) Icons.ChevronDown else Icons.ChevronUp,
+            contentDescription = if (isMinimized) "Expand video player" else "Minimize video player",
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
 }
