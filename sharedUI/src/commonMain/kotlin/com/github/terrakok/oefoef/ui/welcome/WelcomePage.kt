@@ -2,10 +2,38 @@ package com.github.terrakok.oefoef.ui.welcome
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.plus
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
@@ -13,10 +41,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -213,46 +247,70 @@ private fun Header() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun WelcomeTopBar() {
-    TopAppBar(
-        title = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(MaterialTheme.colorScheme.primaryContainer),
-                    contentAlignment = Alignment.Center,
+    Box(modifier = Modifier.fillMaxWidth()) {
+        TopAppBar(
+            title = {
+                Row(
+                    modifier = Modifier.padding(top = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.primaryContainer),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = Icons.School,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(28.dp),
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column(
+                        modifier = Modifier.pointerHoverIcon(icon = PointerIcon.Hand)
+                    ) {
+                        val uriHandler = LocalUriHandler.current
+                        Text(
+                            text = "OefOef",
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Text(
+                            text = buildAnnotatedString {
+                                append("Running on ")
+                                withStyle(style = SpanStyle(textDecoration = TextDecoration.Underline)) {
+                                    append("Compose Web")
+                                }
+                                append(" \uD83D\uDC9A")
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.clickable {
+                                uriHandler.openUri("https://github.com/JetBrains/compose-multiplatform-core")
+                            }
+                        )
+                    }
+                }
+            },
+            actions = {
+                val uriHandler = LocalUriHandler.current
+                IconButton(
+                    onClick = {
+                        uriHandler.openUri("$MAILTO_LINK%3Cwrite%20something%20here%3E")
+                    },
                 ) {
                     Icon(
-                        imageVector = Icons.School,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp),
+                        imageVector = Icons.EmailHeart,
+                        contentDescription = "Support",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = "OefOef",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-            }
-        },
-        actions = {
-            val uriHandler = LocalUriHandler.current
-            IconButton(
-                onClick = {
-                    uriHandler.openUri("$MAILTO_LINK%3Cwrite%20something%20here%3E")
-                },
-            ) {
-                Icon(
-                    imageVector = Icons.EmailHeart,
-                    contentDescription = "Support",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        },
-    )
+            },
+        )
+    }
 }
 
 @Composable
